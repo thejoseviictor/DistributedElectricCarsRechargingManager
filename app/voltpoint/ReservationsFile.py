@@ -60,18 +60,24 @@ class ReservationsFile:
             with open(self.json_file, "r", encoding="utf-8") as file:
                 self.reservationsList = json.load(file) # Salvando os Dados do Arquivo ".json" na Lista.
     
-    # Procurando uma Reserva para um Veículo Específico:
-    def findReservation(self, vehicleID: int):
+    # Procurando as Reservas para um Veículo Específico:
+    def findReservations(self, vehicleID: int):
+        self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
+        foundedReservations = []
         # Percorrendo a Lista de Reservas:
         for reservation in self.reservationsList:
             if reservation["vehicleID"] == vehicleID:
-                return reservation
+                foundedReservations.append(reservation)
+        # Retornando as Reservas Encontradas:
+        if foundedReservations:
+            return foundedReservations
         else:
-            print(f"\nNenhuma Reserva Foi Encontrada Para o Veículo com ID '{vehicleID}'!\n")
+            print(f"Nenhuma Reserva Foi Encontrada Para o Veículo com ID '{vehicleID}'!\n")
             return None
 
     # Listando Todas as Reservas Cadastradas para os Pontos de Carregamento, em um Posto de Recarga Específico:
     def listReservations(self, chargingStationID: int):
+        self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         searchList = [] # Onde Serão Salvas as Reservas Encontradas.
         for reservation in self.reservationsList:
             if reservation["chargingStationID"] == chargingStationID:
@@ -87,6 +93,7 @@ class ReservationsFile:
     # Encontrando a Data de Finalização da Última Reserva Cadastrada em um Ponto de Carregamento Específico:
     # Resumindo, Descobrir Quando o Último Veículo Vai Terminar de Usar o Ponto de Carregamento.
     def getLastReservationFinishDateTime(self, chargingPointID: int):
+        self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         found = False # Indicará Se um Data Posterior For Encontrada.
         lastDateTime = datetime.datetime(1999, 12, 31, 0, 0, 0) # Data de Base para Comparação Inicial.
         # Percorrendo a Lista de Reservas:
@@ -118,6 +125,7 @@ class ReservationsFile:
     
     # Criando uma Reserva e Salvando no Arquivo ".json":
     def createReservation(self, chargingStationID: int, chargingPointID: int, vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float):
+        self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         # Buscando Informações do Ponto de Carregamento Selecionado:
         cp = ChargingPointsFile() # cp = Charging Point.
         cp = cp.findChargingPoint(chargingPointID, chargingStationID) # Salvando a Celular Encontrada.
@@ -147,11 +155,12 @@ class ReservationsFile:
             "duration": reservationObj.duration, 
             "price": reservationObj.price})
         self.saveReservations() # Salvando no Arquivo .json.
-        print(f"\nReserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
-        return self.findReservation(vehicleID) # Retornando a Reserva Criada.
+        print(f"Reserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
+        return self.findReservations(vehicleID) # Retornando a Reserva Criada.
     
     # Removendo uma Reserva de um Veículo Específico:
     def deleteReservation(self, reservationID: int, vehicleID: int):
+        self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         newReservationsList = [] # Lista de Backup das Reservas.
         foundStatus = False # Salva o Status de Reserva Encontrada.
         for reservation in self.reservationsList:
@@ -165,8 +174,8 @@ class ReservationsFile:
         self.saveReservations() # Salvando no Arquivo ".json".
         # Exibindo as Mensagens de Status:
         if foundStatus:
-            print(f"\nReserva com ID '{reservationID}', Para o Veículo com ID '{vehicleID}', Foi Removida com Sucesso!\n")
+            print(f"Reserva com ID '{reservationID}', Para o Veículo com ID '{vehicleID}', Foi Removida com Sucesso!\n")
             return foundStatus # Retornando "True"
         else:
-            print(f"\nReserva com ID '{reservationID}', Para o Veículo com ID '{vehicleID}', Não Foi Encontrada!\n")
+            print(f"Reserva com ID '{reservationID}', Para o Veículo com ID '{vehicleID}', Não Foi Encontrada!\n")
             return foundStatus # Retornando "False"
