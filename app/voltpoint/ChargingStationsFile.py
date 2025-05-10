@@ -47,7 +47,7 @@ class ChargingStationsFile:
         # Exibindo as Mensagens de Status:
         if updateStatus:
             self.saveChargingStations() # Salvando no Arquivo ".json".
-            print(f"\nA Cidade do Posto de Recarga com ID '{chargingStationID}' Foi Alterada Para '{city_name}' com Sucesso!\n")
+            print(f"\nA Cidade do Posto de Recarga com ID '{chargingStationID}' Foi Alterada para '{city_name}' com Sucesso!\n")
             return updateStatus # Retornando o Status.
         else:
             return updateStatus # Retornando o Status.
