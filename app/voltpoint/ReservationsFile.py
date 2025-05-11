@@ -50,7 +50,8 @@ class Reservation:
 class ReservationsFile: 
     # Inicializando a Classe e seus Atributos:
     def __init__(self, json_file="reservations.json"):
-        self.json_file = json_file
+        os.makedirs("data", exist_ok=True) # Criando a Pasta "data", Se Não Existir.
+        self.json_file = os.path.join("data", json_file) # Salvando o Banco de Dados na Pasta "data".
         self.reservationsList = [] # Lista de Reservas.
         self.readReservations() # Recuperando os Dados do Arquivo ".json"
     
