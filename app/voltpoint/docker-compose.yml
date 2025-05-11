@@ -12,7 +12,7 @@ services:
       - ECOCHARGE_SERVER_PORT=64000 # Porta do End-Point do Servidor da Empresa "EcoCharge".
       - EFLUX_SERVER_IP=192.168.0.1 # IP do End-Point do Servidor da Empresa "E-Flux".
       - EFLUX_SERVER_PORT=64111 # Porta do End-Point do Servidor da Empresa "E-Flux".
-      - VOLTPOINT_SERVER_IP=192.168.0.1 # IP do End-Point do Servidor da Empresa "VoltPoint".
+      - VOLTPOINT_SERVER_IP=0.0.0.0 # IP do End-Point do Servidor da Empresa "VoltPoint".
       - VOLTPOINT_SERVER_PORT=64222 # Porta do End-Point do Servidor da Empresa "VoltPoint".
     network_mode: host # A Rede do Servidor Será a Mesma da Máquina.
     restart: always # O Servidor Será Reiniciado, Se Houver Alguma Parada Inesperada.
