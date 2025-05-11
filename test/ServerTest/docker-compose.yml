@@ -9,4 +9,3 @@ services:
     environment:
       - .env # Lendo as Variáveis de Ambiente.
     network_mode: host # A Rede do Servidor Será a Mesma da Máquina.
-    restart: always # O Servidor Será Reiniciado, Se Houver Alguma Parada Inesperada.
