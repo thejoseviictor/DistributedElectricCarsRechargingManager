@@ -1,0 +1,20 @@
+[
+  {
+    "nameServer": "VoltPoint" ,
+    "ip": "10.0.0.168",
+    "port": 1883
+  },
+
+  {
+    "nameServer": "E-Flux" ,
+    "ip": "10.0.0.168",
+    "port": 1883
+  },
+
+  {
+    "nameServer": "EcoCharge" ,
+    "ip": "10.0.0.168",
+    "port": 1883
+  }
+    
+]
