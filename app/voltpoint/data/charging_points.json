@@ -1,9 +1,0 @@
-[
-    {
-        "chargingPointID": 1,
-        "chargingStationID": 1,
-        "power": 120,
-        "kWhPrice": 12,
-        "availability": true
-    }
-]
