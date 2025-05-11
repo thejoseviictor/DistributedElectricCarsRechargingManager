@@ -158,7 +158,7 @@ class ReservationsFile:
             print(f"Reserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
             return self.findReservations(vehicleID) # Retornando a Reserva Criada.
         else:
-            print(f'Ponto de Carregamento com ID {chargingPointID}, no Posto de Recarga com ID {chargingStationID}, Não Foi Encontrado!')
+            print(f'Ponto de Carregamento com ID {chargingPointID}, no Posto de Recarga com ID {chargingStationID}, Não Foi Encontrado!\n')
             return False
     
     # Removendo uma Reserva de um Veículo Específico:
