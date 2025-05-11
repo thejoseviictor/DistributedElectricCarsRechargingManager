@@ -1,4 +1,4 @@
-# Esta Classe é Responsável por Armazenar os Dados dos Pontos de Carregamento dos Postos de Recarga em um Arquivo ".json" na Nuvem.
+# Esta Classe é Responsável por Armazenar os Dados dos Pontos de Carregamento dos Postos de Recarga em um Arquivo ".json" no Servidor.
 # "Charging Point" é um Local de Carregamento Dentro de um Posto Específico, nos Carros a Combustão São Conhecidos como "Bombas".
 
 import json
