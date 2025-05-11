@@ -45,7 +45,6 @@ class ChargingPointsFile:
 
     # Atualizando os Dados de um Ponto de Carregamento de um Posto Específico:
     def updateChargingPoint(self, chargingPointID: int, chargingStationID: int, power: float, kWhPrice: float, availability: bool):
-        self.readChargingPoints() # Atualizando a Memória de Execução Com o Banco de Dados em "charging_points.json".
         updateStatus = False # Vai Salvar o Status da Atualização.
         cp = self.findChargingPoint(chargingPointID, chargingStationID) # Percorrendo a Lista de Pontos de Carregamento.
         if cp:
