@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  voltpoint:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: voltpoint_server
+    environment:
+      - PYTHONUNBUFFERED=1 # Para Exibir os Prints no Terminal.
+    ports:
+      - "64352:64352"
+    networks:
+      - recharging_manager
+    expose:
+      - "64352"
+    restart: always # O Servidor Será Reiniciado, Se Houver Alguma Parada Inesperada.
+
+# Rede Onde os Containers Têm IP Próprio, Como Dispositivos Reais:
+networks:
+  recharging_manager:
+    driver: macvlan
+    driver_opts:
+      parent: eth0
