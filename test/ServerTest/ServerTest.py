@@ -19,17 +19,19 @@ data_delete = {
     "vehicleID": 12
 }
 
-# Recebendo e Formatando o IP dos Servidores Providos pelas Variáveis de Ambiente:
-# Obs: "strip" foi usado para remover as aspas.
-ECOCHARGE_SERVER_IP = os.environ.get('ECOCHARGE_SERVER_IP').strip('"\'')
-EFLUX_SERVER_IP = os.environ.get('EFLUX_SERVER_IP').strip('"\'')
-VOLTPOINT_SERVER_IP = os.environ.get('VOLTPOINT_SERVER_IP').strip('"\'')
+# Recebendo os IP e Portas dos Servidores Providos pelas Variáveis de Ambiente:
+ECOCHARGE_SERVER_IP = os.environ.get('ECOCHARGE_SERVER_IP')
+ECOCHARGE_SERVER_PORT = os.environ.get('ECOCHARGE_SERVER_PORT')
+EFLUX_SERVER_IP = os.environ.get('EFLUX_SERVER_IP')
+EFLUX_SERVER_PORT = os.environ.get('EFLUX_SERVER_PORT')
+VOLTPOINT_SERVER_IP = os.environ.get('VOLTPOINT_SERVER_IP')
+VOLTPOINT_SERVER_PORT = os.environ.get('VOLTPOINT_SERVER_PORT')
 
-response = requests.post(f'http://{VOLTPOINT_SERVER_IP}:64123/reservation', json=data_post)
+response = requests.post(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=data_post)
 print(response.json())
 
-response = requests.get(f'http://{VOLTPOINT_SERVER_IP}:64123/reservation', params=data_get)
+response = requests.get(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', params=data_get)
 print(response.json())
 
-response = requests.delete(f'http://{VOLTPOINT_SERVER_IP}:64123/reservation', json=data_delete)
+response = requests.delete(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=data_delete)
 print(response.json())
