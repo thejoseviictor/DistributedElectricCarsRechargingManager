@@ -19,16 +19,18 @@ class ChargingStationsFile:
     
     # Procurando um Posto de Recarga Específico:
     def findChargingStation(self, chargingStationID: int):
+        self.readChargingStations() # Atualizando a Memória de Execução Com o Banco de Dados em "charging_stations.json".
         # Percorrendo a Lista:
         for cs in self.chargingStationsList:
             if cs["chargingStationID"] == chargingStationID:
                 return cs
         else:
-            print(f"\nPosto de Recarga com ID '{chargingStationID}' Não Foi Encontrado!\n")
+            print(f"Posto de Recarga com ID '{chargingStationID}' Não Foi Encontrado!\n")
             return None
 
     # Listando os Postos de Recarga Cadastrados no Arquivo ".json":
     def listChargingStations(self):
+        self.readChargingStations() # Atualizando a Memória de Execução Com o Banco de Dados em "charging_stations.json".
         return self.chargingStationsList
 
     # Salvando a Lista no Arquivo ".json":
@@ -47,7 +49,7 @@ class ChargingStationsFile:
         # Exibindo as Mensagens de Status:
         if updateStatus:
             self.saveChargingStations() # Salvando no Arquivo ".json".
-            print(f"\nA Cidade do Posto de Recarga com ID '{chargingStationID}' Foi Alterada para '{city_name}' com Sucesso!\n")
+            print(f"A Cidade do Posto de Recarga com ID '{chargingStationID}' Foi Alterada para '{city_name}' com Sucesso!\n")
             return updateStatus # Retornando o Status.
         else:
             return updateStatus # Retornando o Status.
@@ -65,6 +67,7 @@ class ChargingStationsFile:
     
     # Criando um Novo Posto de Recarga e Salvando no Arquivo ".json":
     def createChargingStation(self, city_codename: str, city_name: str):
+        self.readChargingStations() # Atualizando a Memória de Execução Com o Banco de Dados em "charging_stations.json".
         chargingStationID = self.generateChargingStationID()
         # Salvando na Lista:
         self.chargingStationsList.append({
@@ -72,11 +75,12 @@ class ChargingStationsFile:
             "city_codename": city_codename, 
             "city_name": city_name})
         self.saveChargingStations() # Salvando no Arquivo ".json".
-        print(f"\nPosto de Recarga com ID '{chargingStationID}' em '{city_name}' Foi Salvo com Sucesso!\n")
+        print(f"Posto de Recarga com ID '{chargingStationID}' em '{city_name}' Foi Salvo com Sucesso!\n")
         return chargingStationID # Retornando o ID do Posto de Recarga Criado.
     
     # Removendo um Posto do Arquivo ".json":
     def deleteChargingStation(self, chargingStationID: int):
+        self.readChargingStations() # Atualizando a Memória de Execução Com o Banco de Dados em "charging_stations.json".
         newChargingStationsList = [] # Lista de Backup dos Postos.
         foundStatus = False # Salva o Status de Posto de Recarga Encontrado.
         for cs in self.chargingStationsList:
@@ -90,8 +94,8 @@ class ChargingStationsFile:
         self.saveChargingStations() # Salvando no Arquivo ".json".
         # Exibindo as Mensagens de Status:
         if foundStatus:
-            print(f"\nPosto de Recarga com ID '{chargingStationID}' Foi Removido com Sucesso!\n")
+            print(f"Posto de Recarga com ID '{chargingStationID}' Foi Removido com Sucesso!\n")
             return foundStatus # Retornando o Status.
         else:
-            print(f"\nPosto de Recarga com ID '{chargingStationID}' Não Foi Encontrado!\n")
+            print(f"Posto de Recarga com ID '{chargingStationID}' Não Foi Encontrado!\n")
             return foundStatus # Retornando o Status.
