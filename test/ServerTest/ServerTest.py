@@ -19,7 +19,9 @@ data_delete = {
     "vehicleID": 12
 }
 
-ECOCHARGE_SERVER_IP = os.environ.get('ECOCHARGE_SERVER_IP')
+# Recebendo e Formatando o IP dos Servidores Providos pelas Variáveis de Ambiente:
+# Obs: "strip" foi usado para remover as aspas.
+ECOCHARGE_SERVER_IP = os.environ.get('ECOCHARGE_SERVER_IP').strip('"\'')
 EFLUX_SERVER_IP = os.environ.get('EFLUX_SERVER_IP')
 VOLTPOINT_SERVER_IP = os.environ.get('VOLTPOINT_SERVER_IP')
 
