@@ -31,7 +31,7 @@ def create_reservation():
 def read_reservations():
     vehicleID = request.args.get('vehicleID') # Salvando o ID Recebido com Parâmetro.
     print(f"ID do Veículo Recebido: {vehicleID}\n")
-    foundedReservations = reservations.findReservation(int(vehicleID)) # Procurando pelas Reservas do Veículo.
+    foundedReservations = reservations.findReservations(int(vehicleID)) # Procurando pelas Reservas do Veículo.
     return jsonify(foundedReservations)
 
 # Criando a Rota, Solicitada por Outro Servidor, para Excluir uma Reserva de um Veículo Específico:
