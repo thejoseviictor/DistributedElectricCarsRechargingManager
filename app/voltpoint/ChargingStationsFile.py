@@ -7,7 +7,8 @@ import os
 class ChargingStationsFile:
     # Inicializando a Classe e seus Atributos:
     def __init__(self, json_file="charging_stations.json"):
-        self.json_file = json_file
+        os.makedirs("data", exist_ok=True) # Criando a Pasta "data", Se Não Existir.
+        self.json_file = os.path.join("data", json_file) # Salvando o Banco de Dados na Pasta "data".
         self.chargingStationsList = [] # Lista dos Postos de Recarga.
         self.readChargingStations() # Recuperando os Dados do Arquivo ".json"
 
