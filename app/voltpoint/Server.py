@@ -29,10 +29,9 @@ def create_reservation():
 # Criando a Rota, Solicitada por Outro Servidor, para Ler as Reservas de um Veículo Específico:
 @app.route('/reservation', methods=['GET'])
 def read_reservations():
-    data = request.json # Recebendo os Dados em JSON.
-    vehicleID = data.get('vehicleID') # Salvando o ID do Veículo, Recebido pelo JSON.
-    print(f"\nDados Recebidos para Reserva: {data}\n")
-    foundedReservations = reservations.findReservations(vehicleID) # Procurando pelas Reservas do Veículo.
+    vehicleID = request.args.get('vehicleID') # Salvando o ID Recebido com Parâmetro.
+    print(f"ID do Veículo Recebido: {vehicleID}\n")
+    foundedReservations = reservations.findReservation(int(vehicleID)) # Procurando pelas Reservas do Veículo.
     return jsonify(foundedReservations)
 
 # Criando a Rota, Solicitada por Outro Servidor, para Excluir uma Reserva de um Veículo Específico:
