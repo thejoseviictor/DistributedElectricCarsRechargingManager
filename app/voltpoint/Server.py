@@ -46,6 +46,6 @@ def delete_reservation():
     deleteStatus = reservations.deleteReservation(reservationID, chargingStationID, chargingPointID, vehicleID)
     return jsonify(deleteStatus)
 
-# Rodando o Servidor no Host da Máquina e na Porta '64123'
+# Rodando o Servidor no Host da Máquina e na Porta '64222'
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=64123, debug=True)
+    app.run(host='0.0.0.0', port=64222, debug=True)
