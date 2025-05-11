@@ -35,6 +35,19 @@ def read_reservations():
     foundedReservations = reservations.findReservations(vehicleID) # Procurando pelas Reservas do Veículo.
     return jsonify(foundedReservations)
 
+# Criando a Rota, Solicitada por Outro Servidor, para Excluir uma Reserva de um Veículo Específico:
+@app.route('/reservation', methods=['DELETE'])
+def delete_reservation():
+    data = request.json # Recebendo os Dados em JSON.
+    reservationID = data.get('reservationID') # Salvando o ID da Reserva, Recebido pelo JSON.
+    chargingStationID = data.get('chargingStationID') # Salvando o ID do Posto de Recarga, Recebido pelo JSON.
+    chargingPointID = data.get('chargingPointID') # Salvando o ID do Ponto de Carregamento, Recebido pelo JSON.
+    vehicleID = data.get('vehicleID') # Salvando o ID do Veículo, Recebido pelo JSON.
+    print(f"\nDados Recebidos para Reserva: {data}\n")
+
+    deleteStatus = reservations.deleteReservation(reservationID, chargingStationID, chargingPointID, vehicleID)
+    return jsonify(deleteStatus)
+
 # Rodando o Servidor:
 if __name__ == '__main__':
     app.run(debug=True)
