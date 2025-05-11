@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  recharging_manager_server_test:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: recharging_manager_server_test
+    environment:
+      - PYTHONUNBUFFERED=1 # Para Exibir os Prints no Terminal.
+    ports:
+      - "64123:64123"
+    networks:
+      - recharging_manager
+    expose:
+      - "64123"
+    restart: always # O Servidor Será Reiniciado, Se Houver Alguma Parada Inesperada.
+
+# Rede Onde os Containers Têm IP Próprio, Como Dispositivos Reais:
+networks:
+  recharging_manager:
+    driver: macvlan
+    driver_opts:
+      parent: eth0
