@@ -45,21 +45,20 @@ class ChargingPointsFile:
             json.dump(self.chargingPointsList, file, indent=4)
 
     # Atualizando os Dados de um Ponto de Carregamento de um Posto Específico:
-    def updateChargingPoint(self, chargingPointID: int, chargingStationID: int, power: float, kWhPrice: float, availability: bool):
-        updateStatus = False # Vai Salvar o Status da Atualização.
-        cp = self.findChargingPoint(chargingPointID, chargingStationID) # Percorrendo a Lista de Pontos de Carregamento.
-        if cp:
-            cp["power"] = power # Potência do Carregador em kW.
-            cp["kWhPrice"] = kWhPrice
-            cp["availability"] = availability # "livre", "ocupado" ou "reservado".
-            updateStatus = True
-        # Exibindo as Mensagens de Status:
-        if updateStatus:
-            self.saveChargingPoints() # Salvando no Arquivo ".json".
-            print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Foi Atualizado com Sucesso!\n")
-            return updateStatus # Retornando o Status.
-        else:
-            return updateStatus # Retornando o Status.
+    def updateChargingPoint(self, chargingPointID: int, chargingStationID: int, power: float, kWhPrice: float, availability: str):
+        self.readChargingPoints() # Atualizando a Memória de Execução.
+        # Percorrendo a Lista:
+        for cp in self.chargingPointsList: # cp = Charging Point - Ponto de Carregamento.
+            if cp["chargingPointID"] == chargingPointID and cp["chargingStationID"] == chargingStationID:
+                cp["power"] = power # Potência do Carregador em kW.
+                cp["kWhPrice"] = kWhPrice
+                cp["availability"] = availability # "livre", "ocupado" ou "reservado".
+                self.saveChargingPoints() # Salvando no Arquivo ".json".
+                print(f"Os Dados do Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Foram Atualizados!\n")
+                return True
+        # Exibindo a Mensagem de Erro:
+        print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Não Foi Encontrado!\n")
+        return None
     
     # Gerando um ID para Novo Ponto de Carregamento:
     # Os IDs Não Podem Ser Iguais Para o Mesmo Posto de Recarga.
@@ -75,8 +74,8 @@ class ChargingPointsFile:
         return startID
     
     # Criando um Novo Ponto de Carregamento e Salvando no Arquivo ".json":
-    def createChargingPoint(self, chargingStationID: int, power: float, kWhPrice: float, availabilty: bool):
-        self.readChargingPoints() # Atualizando a Memória de Execução Com o Banco de Dados em "charging_points.json".
+    def createChargingPoint(self, chargingStationID: int, power: float, kWhPrice: float, availability: str):
+        self.readChargingPoints() # Atualizando a Memória de Execução.
         # Gerando o ID do Ponto de Carregamento:
         chargingPointID = self.generateChargingPointID(chargingStationID)
         # Salvando na Lista:
@@ -85,30 +84,20 @@ class ChargingPointsFile:
             "chargingStationID": chargingStationID, 
             "power": power, # Potência do Carregador em kW.
             "kWhPrice": kWhPrice,
-            "availability": availabilty # "livre", "ocupado" ou "reservado".
+            "availability": availability # "livre", "ocupado" ou "reservado".
             })
         self.saveChargingPoints() # Salvando no Arquivo ".json".
-        print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Foi Salvo com Sucesso!\n")
+        print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Foi Criado com Sucesso!\n")
         return chargingPointID # Retornando o ID do Ponto de Carregamento Criado.
     
     # Removendo um Ponto de Carregamento do Arquivo ".json":
     def deleteChargingPoint(self, chargingPointID: int, chargingStationID: int):
-        self.readChargingPoints() # Atualizando a Memória de Execução Com o Banco de Dados em "charging_points.json".
-        newChargingPointsList = [] # Lista de Backup dos Pontos de Carregamento.
-        foundStatus = False # Salva o Status de Ponto de Carregamento Encontrado.
+        self.readChargingPoints() # Atualizando a Memória de Execução.
         for cp in self.chargingPointsList:
-            # Atualizando o Status, Se o Ponto de Carregamento a Ser Removido For Encontrado na Lista:
             if cp["chargingPointID"] == chargingPointID and cp["chargingStationID"] == chargingStationID:
-                foundStatus = True
-            # Copiando os Pontos de Carregamento com ID e Posto de Recarga Diferentes para uma Nova Lista:
-            else:
-                newChargingPointsList.append(cp)
-        self.chargingPointsList = newChargingPointsList # Restaurando a Lista de Pontos de Carregamento.
-        self.saveChargingPoints() # Salvando no Arquivo ".json".
-        # Exibindo as Mensagens de Status:
-        if foundStatus:
-            print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Foi Removido com Sucesso!\n")
-            return foundStatus # Retornando o Status.
-        else:
-            print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Não Foi Encontrado!\n")
-            return foundStatus # Retornando o Status.
+                self.chargingPointsList.remove(cp)
+                self.saveChargingPoints() # Salvando no Arquivo ".json".
+                print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Foi Removido com Sucesso!\n")
+                return True
+        print(f"Ponto de Carregamento com ID '{chargingPointID}', no Posto de Recarga '{chargingStationID}', Não Foi Encontrado!\n")
+        return None
