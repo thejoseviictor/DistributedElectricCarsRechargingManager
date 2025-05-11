@@ -158,23 +158,24 @@ class ReservationsFile:
         return self.findReservations(vehicleID) # Retornando a Reserva Criada.
     
     # Removendo uma Reserva de um Veículo Específico:
-    def deleteReservation(self, reservationID: int, vehicleID: int):
+    def deleteReservation(self, reservationID: int, chargingStationID: int, chargingPointID: int, vehicleID: int):
         self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         newReservationsList = [] # Lista de Backup das Reservas.
         foundStatus = False # Salva o Status de Reserva Encontrada.
         for reservation in self.reservationsList:
             # Atualizando o Status, Se a Reserva a Ser Removida For Encontrada:
             if reservation["reservationID"] == reservationID and reservation["vehicleID"] == vehicleID:
-                foundStatus = True
-            # Copiando as Reservas com ID e "VehicleID" Diferentes para uma Nova Lista:
+                if reservation["chargingStationID"] == chargingStationID and reservation["chargingPointID"] == chargingPointID:
+                    foundStatus = True
+            # Copiando as Reservas que Não Corresponderam para uma Nova Lista:
             else:
                 newReservationsList.append(reservation)
         self.reservationsList = newReservationsList # Restaurando a Lista de Reservas, Sem a Removida.
         self.saveReservations() # Salvando no Arquivo ".json".
         # Exibindo as Mensagens de Status:
         if foundStatus:
-            print(f"Reserva com ID '{reservationID}', Para o Veículo com ID '{vehicleID}', Foi Removida com Sucesso!\n")
+            print(f"A Reserva Foi Removida com Sucesso!\n")
             return foundStatus # Retornando "True"
         else:
-            print(f"Reserva com ID '{reservationID}', Para o Veículo com ID '{vehicleID}', Não Foi Encontrada!\n")
+            print(f"A Reserva Não Foi Encontrada!\n")
             return foundStatus # Retornando "False"
