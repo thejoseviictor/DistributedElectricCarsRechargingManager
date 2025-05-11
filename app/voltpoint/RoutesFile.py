@@ -36,7 +36,8 @@ class RoutesFile:
                         return resultedRoute
             allowAppend = False # Restaurando a Permissão de Salvamento.
             resultedRoute = [] # Limpando a Lista para Percorrer uma Nova Rota.
-        return None # Não Encontrou uma Rota Que Atende as Cidades de Partida e Destino.
+        print(f"Não Foi Encontrada uma Rota Que Percorre as Cidades!\n")
+        return None
 
     # Salvando a Lista de Rotas no Banco de Dados:
     def saveRoutes(self):
@@ -67,6 +68,7 @@ class RoutesFile:
         return startID
     
     # Criando uma Nova Rota no Arquivo ".json":
+    # Formatação da Lista das Cidades: [{"codename": str, "name": str, "location": int, "company": str}]
     def createRoute(self, cities: list):
         self.readRoutes() # Atualizando a Memória de Execução.
         # Gerando o ID da Rota:
@@ -87,6 +89,7 @@ class RoutesFile:
             if route["routeID"] == routeID:
                 self.routesList.remove(route)
                 self.saveRoutes() # Salvando no Arquivo ".json".
+                print(f"A Rota Com ID '{routeID}' Foi Removida!\n")
                 return True
         print(f"A Rota Com ID '{routeID}' Não Foi Encontrada!\n")
         return None
