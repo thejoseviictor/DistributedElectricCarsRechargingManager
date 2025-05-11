@@ -22,8 +22,8 @@ data_delete = {
 # Recebendo e Formatando o IP dos Servidores Providos pelas Variáveis de Ambiente:
 # Obs: "strip" foi usado para remover as aspas.
 ECOCHARGE_SERVER_IP = os.environ.get('ECOCHARGE_SERVER_IP').strip('"\'')
-EFLUX_SERVER_IP = os.environ.get('EFLUX_SERVER_IP')
-VOLTPOINT_SERVER_IP = os.environ.get('VOLTPOINT_SERVER_IP')
+EFLUX_SERVER_IP = os.environ.get('EFLUX_SERVER_IP').strip('"\'')
+VOLTPOINT_SERVER_IP = os.environ.get('VOLTPOINT_SERVER_IP').strip('"\'')
 
 response = requests.post(f'http://{VOLTPOINT_SERVER_IP}:64123/reservation', json=data_post)
 print(response.json())
