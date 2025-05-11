@@ -132,31 +132,34 @@ class ReservationsFile:
         if cp:
             chargingPointPower = cp["power"]
             kWhPrice = cp["kWhPrice"]
-        # Gerando o ID da Nova Reserva:
-        reservationID = self.generateReservationID(chargingPointID)
-        # Descobrindo a Data de Finalização da Última Reserva:
-        lastReservationFinishDateTime = self.getLastReservationFinishDateTime(chargingPointID)
-        # Se Não Houverem Reservas, a Nova Reserva Será do Horário Atual + 5 Minutos:
-        if lastReservationFinishDateTime is None:
-            lastReservationFinishDateTime = datetime.datetime.now().isoformat()
-        # Gerando o Objeto da Reserva:
-        reservationObj = Reservation(reservationID, chargingStationID, chargingPointID, chargingPointPower, kWhPrice, 
-                                        vehicleID, actualBatteryPercentage, batteryCapacity, lastReservationFinishDateTime)
-        # Salvando as Informações da Reserva na Lista:
-        self.reservationsList.append({
-            "reservationID": reservationObj.reservationID, 
-            "chargingStationID": reservationObj.chargingStationID, 
-            "chargingPointID": reservationObj.chargingPointID, 
-            "chargingPointPower": reservationObj.chargingPointPower, 
-            "kWhPrice": reservationObj.kWhPrice, 
-            "vehicleID": reservationObj.vehicleID, 
-            "startDateTime": reservationObj.startDateTime,
-            "finishDateTime": reservationObj.finishDateTime, 
-            "duration": reservationObj.duration, 
-            "price": reservationObj.price})
-        self.saveReservations() # Salvando no Arquivo .json.
-        print(f"Reserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
-        return self.findReservations(vehicleID) # Retornando a Reserva Criada.
+            # Gerando o ID da Nova Reserva:
+            reservationID = self.generateReservationID(chargingPointID)
+            # Descobrindo a Data de Finalização da Última Reserva:
+            lastReservationFinishDateTime = self.getLastReservationFinishDateTime(chargingPointID)
+            # Se Não Houverem Reservas, a Nova Reserva Será do Horário Atual + 5 Minutos:
+            if lastReservationFinishDateTime is None:
+                lastReservationFinishDateTime = datetime.datetime.now().isoformat()
+            # Gerando o Objeto da Reserva:
+            reservationObj = Reservation(reservationID, chargingStationID, chargingPointID, chargingPointPower, kWhPrice, 
+                                            vehicleID, actualBatteryPercentage, batteryCapacity, lastReservationFinishDateTime)
+            # Salvando as Informações da Reserva na Lista:
+            self.reservationsList.append({
+                "reservationID": reservationObj.reservationID, 
+                "chargingStationID": reservationObj.chargingStationID, 
+                "chargingPointID": reservationObj.chargingPointID, 
+                "chargingPointPower": reservationObj.chargingPointPower, 
+                "kWhPrice": reservationObj.kWhPrice, 
+                "vehicleID": reservationObj.vehicleID, 
+                "startDateTime": reservationObj.startDateTime,
+                "finishDateTime": reservationObj.finishDateTime, 
+                "duration": reservationObj.duration, 
+                "price": reservationObj.price})
+            self.saveReservations() # Salvando no Arquivo .json.
+            print(f"Reserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
+            return self.findReservations(vehicleID) # Retornando a Reserva Criada.
+        else:
+            print(f'Ponto de Carregamento com ID {chargingPointID}, no Posto de Recarga com ID {chargingStationID}, Não Foi Encontrado!')
+            return False
     
     # Removendo uma Reserva de um Veículo Específico:
     def deleteReservation(self, reservationID: int, chargingStationID: int, chargingPointID: int, vehicleID: int):
