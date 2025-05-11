@@ -44,7 +44,6 @@ def delete_reservation():
     chargingPointID = data.get('chargingPointID') # Salvando o ID do Ponto de Carregamento, Recebido pelo JSON.
     vehicleID = data.get('vehicleID') # Salvando o ID do Veículo, Recebido pelo JSON.
     print(f"\nDados Recebidos para Reserva: {data}\n")
-
     deleteStatus = reservations.deleteReservation(reservationID, chargingStationID, chargingPointID, vehicleID)
     return jsonify(deleteStatus)
 
