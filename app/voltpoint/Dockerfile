@@ -11,7 +11,7 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expondo a Porta do Servidor:
-EXPOSE 64352
+EXPOSE 64123
 
 # Executando a API do Servidor:
 CMD ["python", "Server.py"]
