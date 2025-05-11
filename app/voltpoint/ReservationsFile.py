@@ -89,7 +89,6 @@ class ReservationsFile:
         with open(self.json_file, "w", encoding="utf-8") as file:
             json.dump(self.reservationsList, file, indent=4)
 
-    # NÃO FINALIZADO (Verificar Se Tem Espaço Entre Reservas)
     # Encontrando a Data de Finalização da Última Reserva Cadastrada em um Ponto de Carregamento Específico:
     # Resumindo, Descobrir Quando o Último Veículo Vai Terminar de Usar o Ponto de Carregamento.
     def getLastReservationFinishDateTime(self, chargingPointID: int):
