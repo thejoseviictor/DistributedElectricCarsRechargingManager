@@ -42,7 +42,7 @@ class RoutesFile:
     # Salvando a Lista de Rotas no Banco de Dados:
     def saveRoutes(self):
         with open(self.json_file, "w", encoding="utf-8") as file:
-            json.dump(self.routesList, file, indent=4)
+            json.dump(self.routesList, file, indent=4, ensure_ascii=False)
 
     # Atualizando as Cidades de uma Rota Específica:
     def updateRoute(self, routeID: int, cities: list):
@@ -67,15 +67,31 @@ class RoutesFile:
                 startID = route["routeID"] + 1 # ID Novo: Maior ID + 1.
         return startID
     
+    # Calculando a Distância Máxima Entre as Cidades da Rota, Que Será a Autonomia Mínima para os Veículos Trafegarem:
+    def minimumRouteAutonomy(self, cities: list):
+        routeCitiesCount = len(cities) # Quantidade de Cidades na Rota.
+        if routeCitiesCount <= 1:
+            return 0 # A Rota Tem Apenas uma Cidade.
+        else:
+            maximumDistanceBetweenCities = cities[1]["location"] - cities[0]["location"] # Considerando Inicialmente Que a Maior Distância Está Entre as Cidades "1" e "2".
+            for city in range(routeCitiesCount-1):
+                distanceBetweenCities = cities[city+1]["location"] - cities[city]["location"] # Distância Entre a Cidade Atual e a Próxima.
+                if distanceBetweenCities > maximumDistanceBetweenCities:
+                    maximumDistanceBetweenCities = distanceBetweenCities # Achou uma Distância Maior.
+            return maximumDistanceBetweenCities
+    
     # Criando uma Nova Rota no Arquivo ".json":
     # Formatação da Lista das Cidades: [{"codename": str, "name": str, "location": int, "company": str}]
     def createRoute(self, cities: list):
         self.readRoutes() # Atualizando a Memória de Execução.
         # Gerando o ID da Rota:
         routeID = self.generateRouteID()
+        # Calculando a Autonomia Mínima da Rota:
+        minimumAutonomy = self.minimumRouteAutonomy(cities)
         # Salvando na Lista:
         self.routesList.append({
             "routeID": routeID,
+            "minimumAutonomy": minimumAutonomy,
             "cities": cities
             })
         self.saveRoutes() # Atualizando o Arquivo ".json".
