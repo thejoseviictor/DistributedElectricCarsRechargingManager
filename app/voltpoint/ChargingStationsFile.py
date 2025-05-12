@@ -37,7 +37,7 @@ class ChargingStationsFile:
     # Salvando a Lista no Arquivo ".json":
     def saveChargingStations(self):
         with open(self.json_file, "w", encoding="utf-8") as file:
-            json.dump(self.chargingStationsList, file, indent=4)
+            json.dump(self.chargingStationsList, file, indent=4, ensure_ascii=False)
 
     # Atualizando a Cidade de um Posto de Recarga Específico:
     def updateChargingStation(self, chargingStationID: int, city_codename: str, city_name: str):
