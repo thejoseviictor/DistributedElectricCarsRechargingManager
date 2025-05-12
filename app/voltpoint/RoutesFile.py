@@ -86,12 +86,9 @@ class RoutesFile:
         self.readRoutes() # Atualizando a Memória de Execução.
         # Gerando o ID da Rota:
         routeID = self.generateRouteID()
-        # Calculando a Autonomia Mínima da Rota:
-        minimumAutonomy = self.minimumRouteAutonomy(cities)
         # Salvando na Lista:
         self.routesList.append({
             "routeID": routeID,
-            "minimumAutonomy": minimumAutonomy,
             "cities": cities
             })
         self.saveRoutes() # Atualizando o Arquivo ".json".
