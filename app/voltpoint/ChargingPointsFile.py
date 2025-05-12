@@ -42,7 +42,7 @@ class ChargingPointsFile:
     # Salvando a Lista de Pontos de Carregamento no Arquivo ".json":
     def saveChargingPoints(self):
         with open(self.json_file, "w", encoding="utf-8") as file:
-            json.dump(self.chargingPointsList, file, indent=4)
+            json.dump(self.chargingPointsList, file, indent=4, ensure_ascii=False)
 
     # Atualizando os Dados de um Ponto de Carregamento de um Posto Específico:
     def updateChargingPoint(self, chargingPointID: int, chargingStationID: int, power: float, kWhPrice: float, availability: str):
