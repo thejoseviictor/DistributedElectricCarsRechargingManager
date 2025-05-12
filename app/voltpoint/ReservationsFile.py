@@ -88,7 +88,7 @@ class ReservationsFile:
     # Salvando a Lista de Reservas no Arquivo ".json":
     def saveReservations(self):
         with open(self.json_file, "w", encoding="utf-8") as file:
-            json.dump(self.reservationsList, file, indent=4)
+            json.dump(self.reservationsList, file, indent=4, ensure_ascii=False)
 
     # Encontrando a Data de Finalização da Última Reserva Cadastrada em um Ponto de Carregamento Específico:
     # Resumindo, Descobrir Quando o Último Veículo Vai Terminar de Usar o Ponto de Carregamento.
