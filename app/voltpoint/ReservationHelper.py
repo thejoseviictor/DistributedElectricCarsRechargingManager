@@ -46,7 +46,12 @@ def chooseChargingStations(vehicleID: int, departureCityCodename: str, arrivalCi
                     reservationsRoute.append(resultedRoute[city]) # Salvando a Cidade Atual na Lista de Cidades Onde Reservar.
                     currentBatteryAutonomy = totalBatteryAutonomy # Resetando a Autonomia do Veículo, Pois Haverá uma Recarga.
                 currentBatteryAutonomy -= distanceBetweenCities # Autonomia Que o Veículo Terá ao Chegar na Próxima Cidade.
-            return reservationsRoute # Retornando a Lista Com as Cidades Onde Devem Ser Feitas Reservas.
+            # Retornando a Lista Com as Cidades Onde Devem Ser Feitas Reservas:
+            if reservationsRoute:
+                return reservationsRoute
+            # Retornando None, Se Não Houver Necessidade de Reservas:
+            else:
+                return None
 
 # Escolher um Ponto de Carregamento para o Veículo:
 def chooseChargingPoint(chargingStationID: int):
