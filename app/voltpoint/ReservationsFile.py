@@ -159,7 +159,7 @@ class ReservationsFile:
             return self.findReservations(vehicleID) # Retornando a Reserva Criada.
         else:
             print(f'Ponto de Carregamento com ID {chargingPointID}, no Posto de Recarga com ID {chargingStationID}, Não Foi Encontrado!\n')
-            return False
+            return None
     
     # Removendo uma Reserva de um Veículo Específico:
     def deleteReservation(self, reservationID: int, chargingStationID: int, chargingPointID: int, vehicleID: int):
