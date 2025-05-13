@@ -25,6 +25,7 @@ app = Flask(__name__) # "__name__" se tornará "__main__" ao executar.
 
 def sendReservationsToOtherServers(data: json, reservationsRoute: list):
     try:
+        data["reservationsRoute"] = reservationsRoute # Atualizando as Rotas do JSON, Que Será Enviado Para o Outro Servidor.
         # As Informações das Reservas Realizadas Irão Retornar Recursivamente:
         otherCompanyName = reservationsRoute[0]["company"] # Nome da Outra Empresa da Primeira Cidade da Rota.
         print("Redirecionando a Solicitação...\n")
