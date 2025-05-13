@@ -143,7 +143,7 @@ class ReservationsFile:
             reservationObj = Reservation(reservationID, chargingStationID, chargingPointID, chargingPointPower, kWhPrice, 
                                             vehicleID, actualBatteryPercentage, batteryCapacity, lastReservationFinishDateTime)
             # Salvando as Informações da Reserva na Lista:
-            self.reservationsList.append({
+            createdReservation = ({
                 "reservationID": reservationObj.reservationID, 
                 "chargingStationID": reservationObj.chargingStationID, 
                 "chargingPointID": reservationObj.chargingPointID, 
@@ -154,9 +154,10 @@ class ReservationsFile:
                 "finishDateTime": reservationObj.finishDateTime, 
                 "duration": reservationObj.duration, 
                 "price": reservationObj.price})
+            self.reservationsList.append(createdReservation)
             self.saveReservations() # Salvando no Arquivo .json.
             print(f"Reserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
-            return self.findReservations(vehicleID) # Retornando a Reserva Criada.
+            return createdReservation # Retornando a Reserva Criada.
         else:
             print(f'Ponto de Carregamento com ID {chargingPointID}, no Posto de Recarga com ID {chargingStationID}, Não Foi Encontrado!\n')
             return None
