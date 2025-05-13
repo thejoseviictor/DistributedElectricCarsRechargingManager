@@ -3,8 +3,10 @@
 # Importando as Dependências:
 import os # Para Usar Variáveis de Ambiente.
 from flask import Flask, request, jsonify # Para Criar a API do Servidor e Seus End-Points.
-import json
+import json # Para Printar os Erros.
 import requests # Para Comunicação com Outros Servidores.
+from requests.exceptions import RequestException, ConnectionError, Timeout, HTTPError # Exceções Para Problemas de Conexão.
+import urllib3
 from ReservationsFile import ReservationsFile # Que Manipula a Persistência de Dados das Reservas.
 from ChargingStationsFile import ChargingStationsFile
 import ReservationHelper
@@ -22,13 +24,27 @@ chargingStationsData = ChargingStationsFile()
 app = Flask(__name__) # "__name__" se tornará "__main__" ao executar.
 
 def sendReservationsToOtherServers(data: json, reservationsRoute: list):
-    # As Informações das Reservas Realizadas Irão Retornar Recursivamente:
-    otherCompanyName = reservationsRoute[0]["company"] # Nome da Outra Empresa da Primeira Cidade da Rota.
-    print("Redirecionando a Solicitação...\n")
-    OTHER_SERVER_IP = os.environ.get(f'{otherCompanyName.upper()}_SERVER_IP')
-    OTHER_SERVER_PORT = os.environ.get(f'{otherCompanyName.upper()}_SERVER_PORT')
-    otherServerReservations = requests.post(f'http://{OTHER_SERVER_IP}:{OTHER_SERVER_PORT}/reservation', json=data)
-    return otherServerReservations # Retornando a Resposta do Outro Servidor.    
+    try:
+        # As Informações das Reservas Realizadas Irão Retornar Recursivamente:
+        otherCompanyName = reservationsRoute[0]["company"] # Nome da Outra Empresa da Primeira Cidade da Rota.
+        print("Redirecionando a Solicitação...\n")
+        OTHER_SERVER_IP = os.environ.get(f'{otherCompanyName.upper()}_SERVER_IP')
+        OTHER_SERVER_PORT = os.environ.get(f'{otherCompanyName.upper()}_SERVER_PORT')
+        otherServerReservations = requests.post(f'http://{OTHER_SERVER_IP}:{OTHER_SERVER_PORT}/reservation', json=data)
+        return otherServerReservations # Retornando a Resposta do Outro Servidor.
+    # Tratando as Exceções:
+    except urllib3.exceptions.NewConnectionError:
+        return jsonify({"error": "Não Há Caminho Até o Servidor!"}), 502 # Erro 502: Bad Gateway.
+    except (urllib3.exceptions.MaxRetryError, ConnectionError):
+        return jsonify({"error": "Servidor Alvo Está Indisponível!"}), 503 # Erro 503: Service Unavailable.
+    except Timeout:
+        return jsonify({"error": "Timeout!"}), 504 # Erro 504: Gateway Timeout.
+    except HTTPError as e:
+        status_code = e.response.status_code if e.response else 500 # Erro do HTTP ou Erro Genérico.
+        reason = e.response.reason if e.response else "Erro Desconhecido" # Razão do Erro ou Razão Desconhecida.
+        return jsonify({"error": f"Erro HTTP: '{reason}'"}), status_code
+    except RequestException:
+        return jsonify({"error": "Erro Genérico!"}), 500 # Erro 500: Internal Server Error.
 
 # Agendando as Reservas de um Veículo Específico, de Acordo com a Rota (Servidor-Servidor):
 @app.route('/reservation', methods=['POST'])
@@ -46,7 +62,7 @@ def create_reservation():
     # Se a Primeira Cidade da Lista de Rotas de Reservas Não For Administrada Por Este Servidor
     # a Lista de Reservas Será Repassada Para o Servidor Correto:
     if reservationsRoute[0]["company"] != companyName.lower():
-        otherServerReservations = sendReservationsToOtherServers(data, reservationsRoute, bookedReservations)
+        otherServerReservations = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
         if 400 <= otherServerReservations.status_code < 500:
             print(f"Erro '{otherServerReservations.status_code}': {otherServerReservations.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
@@ -91,7 +107,7 @@ def create_reservation():
         return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
     # Repassando as Reservas dos Outros Servidores:
     else:
-        otherServerReservations = sendReservationsToOtherServers(data, reservationsRoute, bookedReservations)
+        otherServerReservations = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
         if 400 <= otherServerReservations.status_code < 500:
             print(f"Erro '{otherServerReservations.status_code}': {otherServerReservations.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
