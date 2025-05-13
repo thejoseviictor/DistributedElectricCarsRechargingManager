@@ -119,7 +119,7 @@ def create_reservation():
         response, status_code = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
         if 400 <= status_code < 505:
-            print(f"Erro '{status_code}': {response.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
+            print(f"Erro '{status_code}': {response.get_json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
             return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
