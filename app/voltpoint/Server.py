@@ -30,8 +30,8 @@ def sendReservationsToOtherServers(data: json, reservationsRoute: list):
         print("Redirecionando a Solicitação...\n")
         OTHER_SERVER_IP = os.environ.get(f'{otherCompanyName.upper()}_SERVER_IP')
         OTHER_SERVER_PORT = os.environ.get(f'{otherCompanyName.upper()}_SERVER_PORT')
-        otherServerReservations = requests.post(f'http://{OTHER_SERVER_IP}:{OTHER_SERVER_PORT}/reservation', json=data)
-        return otherServerReservations # Retornando a Resposta do Outro Servidor.
+        otherServerReservations = requests.post(f'http://{OTHER_SERVER_IP}:{OTHER_SERVER_PORT}/reservation', json=data, timeout=5)
+        return jsonify(otherServerReservations.json()), otherServerReservations.status_code # Retornando a Resposta do Outro Servidor em Flask.
     # Tratando as Exceções:
     except urllib3.exceptions.NewConnectionError:
         return jsonify({"error": "Não Há Caminho Até o Servidor!"}), 502 # Erro 502: Bad Gateway.
@@ -62,13 +62,13 @@ def create_reservation():
     # Se a Primeira Cidade da Lista de Rotas de Reservas Não For Administrada Por Este Servidor
     # a Lista de Reservas Será Repassada Para o Servidor Correto:
     if reservationsRoute[0]["company"] != companyName.lower():
-        otherServerReservations = sendReservationsToOtherServers(data, reservationsRoute)
+        response, status_code = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
-        if 400 <= otherServerReservations.status_code < 500:
-            print(f"Erro '{otherServerReservations.status_code}': {otherServerReservations.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
-            return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), 400  # Erro 400: Bad Request - Dados Enviados Errados ou Incompletos.
+        if 400 <= status_code < 500:
+            print(f"Erro '{status_code}': {response.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
+            return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
-            bookedReservations.append(otherServerReservations) # Concatenando as Reservas Realizadas nos Outros Servidores.
+            bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
     # Exibindo as Informações das Reservas Solicitadas:
     print(f"Dados do Veículo '{vehicleID}' Recebidos para Reservas em:\n")
@@ -107,13 +107,13 @@ def create_reservation():
         return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
     # Repassando as Reservas dos Outros Servidores:
     else:
-        otherServerReservations = sendReservationsToOtherServers(data, reservationsRoute)
+        response, status_code = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
-        if 400 <= otherServerReservations.status_code < 500:
-            print(f"Erro '{otherServerReservations.status_code}': {otherServerReservations.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
-            return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), 400  # Erro 400: Bad Request - Dados Enviados Errados ou Incompletos.
+        if 400 <= status_code < 500:
+            print(f"Erro '{status_code}': {response.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
+            return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
-            bookedReservations.append(otherServerReservations) # Concatenando as Reservas Realizadas nos Outros Servidores.
+            bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
 
 # Criando a Rota para Ler as Reservas de um Veículo Específico (Servidor-Servidor):
