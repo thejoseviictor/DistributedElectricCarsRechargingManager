@@ -19,6 +19,26 @@ data_delete = {
     "vehicleID": 12
 }
 
+reservation_post = {
+    "vehicleID": 1,
+    "actualBatteryPercentage": 20,
+    "batteryCapacity": 51,
+    "reservationsRoute": [
+        {
+            "codename": "v_conquista",
+            "name": "Vitória da Conquista - BA",
+            "location": 0,
+            "company": "voltpoint"
+        },
+        {
+            "codename": "jequie",
+            "name": "Jequié - BA",
+            "location": 154,
+            "company": "voltpoint"
+        }
+    ]
+}
+
 # Recebendo os IP e Portas dos Servidores Providos pelas Variáveis de Ambiente:
 ECOCHARGE_SERVER_IP = os.environ.get('ECOCHARGE_SERVER_IP')
 ECOCHARGE_SERVER_PORT = os.environ.get('ECOCHARGE_SERVER_PORT')
@@ -34,4 +54,7 @@ response = requests.get(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/r
 print(response.json())
 
 response = requests.delete(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=data_delete)
+print(response.json())
+
+response = requests.post(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=reservation_post)
 print(response.json())
