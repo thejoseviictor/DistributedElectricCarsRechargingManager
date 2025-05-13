@@ -54,34 +54,41 @@ def create_reservation():
     actualBatteryPercentage = data.get('actualBatteryPercentage') # Porcentagem Atual de Bateria do Veículo.
     batteryCapacity = data.get('batteryCapacity') # Capacidade de Bateria do Veículo em kWh.
     reservationsRoute = data.get('reservationsRoute') # A Rota das Reservas.
+
     # Verificando Se Existem Reservas Solicitadas na Lista de Rotas para Reservas:
     if not reservationsRoute:
         print("Erro: A Lista da Rota das Reservas Está Vazia!\n")
         return jsonify({"error": "A Lista da Rota das Reservas Está Vazia!"}), 400  # Erro 400: Bad Request - Dados Enviados Errados ou Incompletos.
+    
     bookedReservations = [] # Onde Serão Salvas Todas as Reservas Realizadas, Deste Servidor e dos Outros.
     # Se a Primeira Cidade da Lista de Rotas de Reservas Não For Administrada Por Este Servidor
     # a Lista de Reservas Será Repassada Para o Servidor Correto:
     if reservationsRoute[0]["company"] != companyName.lower():
         response, status_code = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
-        if 400 <= status_code < 500:
-            print(f"Erro '{status_code}': {response.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
+        if 400 <= status_code < 505:
+            print(f"Erro '{status_code}': {response.get_json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
             return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
+    
     # Exibindo as Informações das Reservas Solicitadas:
     print(f"Dados do Veículo '{vehicleID}' Recebidos para Reservas em:\n")
     for city in reservationsRoute:
         print(f"Cidade: {city['name']} | Empresa: {city['company']}\n")
+    
     # Copiando as Reservas Destinadas a Esta Empresa:
     serverReservations = [city for city in reservationsRoute if city["company"] == f"{companyName.lower()}"] # Reservas Para Este Servidor.
+
     # Removendo as Reservas Destinadas a Esta Empresa da Lista Que Será Passada Para os Outros Servidores:
-    reservationsRoute = [city for city in reservationsRoute if city["company"] != f"{companyName.lower()}"] # Reservas Para os Outros Servidores.  
+    reservationsRoute = [city for city in reservationsRoute if city["company"] != f"{companyName.lower()}"] # Reservas Para os Outros Servidores.
+
     # Verificando Se Existem Postos de Recarga Cadastrados Neste Servidor:
     if not chargingStationsData.chargingStationsList:
         print("Erro: Não Existem Postos de Recarga Cadastrados Neste Servidor!\n")
         return jsonify({"error": "Não Existem Postos de Recarga Cadastrados Neste Servidor!"}), 404  # Erro 404: Not Found - Recurso Não Encontrado.
+    
     # Realizando as Reservas Deste Servidor.
     # Procurando os Postos de Recarga Que Atuam nas Cidades:
     for cs in chargingStationsData.chargingStationsList:
@@ -102,14 +109,16 @@ def create_reservation():
                         return jsonify({"error": f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}"}), 404
                     else:
                         bookedReservations.append(currentReservation) # Salvando a Reserva Realizada na Cidade na Lista de Reservas.
+    
     # Retornando as Reservas, Se Não Houveram Mais Reservas Para Outros Servidores:
     if not reservationsRoute:
         return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
+    
     # Repassando as Reservas dos Outros Servidores:
     else:
         response, status_code = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
-        if 400 <= status_code < 500:
+        if 400 <= status_code < 505:
             print(f"Erro '{status_code}': {response.json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
             return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
