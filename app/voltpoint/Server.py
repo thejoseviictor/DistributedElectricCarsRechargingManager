@@ -68,6 +68,10 @@ def create_reservation():
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
         if 400 <= status_code < 505:
             print(f"Erro '{status_code}': {response.get_json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
+            # Limpando as Reservas Realizadas no Servidor Atual:
+            for rs in bookedReservations:
+                reservationsData.deleteReservation(rs["reservationID"], rs["chargingStationID"], rs["chargingPointID", rs["vehicleID"]])
+            # Retornando a Mensagem de Erro:
             return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
@@ -120,6 +124,10 @@ def create_reservation():
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
         if 400 <= status_code < 505:
             print(f"Erro '{status_code}': {response.get_json().get('error')}\n") # Exibindo a Mensagem de Erro Recebida.
+            # Limpando as Reservas Realizadas no Servidor Atual:
+            for rs in bookedReservations:
+                reservationsData.deleteReservation(rs["reservationID"], rs["chargingStationID"], rs["chargingPointID", rs["vehicleID"]])
+            # Retornando a Mensagem de Erro:
             return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
