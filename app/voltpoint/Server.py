@@ -1,18 +1,21 @@
-# Servidor da Empresa "VoltPoint", que Atua no Estado da Bahia --------
+# Servidor da Empresa "VoltPoint", que Atua no Estado da Bahia -------------------------------------------------------------------------------------------------------
 
 # Importando as Dependências:
 import os # Para Usar Variáveis de Ambiente.
 from flask import Flask, request, jsonify # Para Criar a API do Servidor e Seus End-Points.
-import json # Para Printar os Erros.
-import requests # Para Comunicação com Outros Servidores.
-from requests.exceptions import RequestException, ConnectionError, Timeout, HTTPError # Exceções Para Problemas de Conexão.
-import urllib3
+import threading # Para Criar Múltiplas Instâncias.
 from ReservationsFile import ReservationsFile # Que Manipula a Persistência de Dados das Reservas.
-from ChargingStationsFile import ChargingStationsFile
-import ReservationHelper
+from ChargingStationsFile import ChargingStationsFile # Que Manipula a Persistência de Dados dos Postos de Recarga.
+import ReservationHelper # Funções para Gerar Parâmetros para Reservas.
+from MQTT import startMQTT # Função para Configurar e Inicializar o MQTT.
+from Utils import sendReservationsToOtherServers # Função Para Enviar Solicitações de Reservas Para Outros Servidores.
 
 # Salvando o Nome da Empresa:
-companyName = "VoltPoint"
+companyName = os.environ.get('COMPANY_NAME') # Variável de Ambiente do Docker Compose.
+
+# Salvando o IP e Porta do Servidor Desta Empresa:
+SERVER_IP = os.environ.get(f'{companyName.upper()}_SERVER_IP') # IP Definido no Docker-Compose.
+SERVER_PORT = int(os.environ.get(f'{companyName.upper()}_SERVER_PORT')) # Porta Definida no Docker-Compose.
 
 # Criando o Objeto das Reservas no Banco de Dados:
 reservationsData = ReservationsFile()
@@ -23,33 +26,10 @@ chargingStationsData = ChargingStationsFile()
 # Criando a Aplicação Flask:
 app = Flask(__name__) # "__name__" se tornará "__main__" ao executar.
 
-def sendReservationsToOtherServers(data: json, reservationsRoute: list):
-    try:
-        data["reservationsRoute"] = reservationsRoute # Atualizando as Rotas do JSON, Que Será Enviado Para o Outro Servidor.
-        # As Informações das Reservas Realizadas Irão Retornar Recursivamente:
-        otherCompanyName = reservationsRoute[0]["company"] # Nome da Outra Empresa da Primeira Cidade da Rota.
-        print("Redirecionando a Solicitação...\n")
-        OTHER_SERVER_IP = os.environ.get(f'{otherCompanyName.upper()}_SERVER_IP')
-        OTHER_SERVER_PORT = os.environ.get(f'{otherCompanyName.upper()}_SERVER_PORT')
-        otherServerReservations = requests.post(f'http://{OTHER_SERVER_IP}:{OTHER_SERVER_PORT}/reservation', json=data, timeout=5)
-        return jsonify(otherServerReservations.json()), otherServerReservations.status_code # Retornando a Resposta do Outro Servidor em Flask.
-    # Tratando as Exceções:
-    except urllib3.exceptions.NewConnectionError:
-        return jsonify({"error": "Não Há Caminho Até o Servidor!"}), 502 # Erro 502: Bad Gateway.
-    except (urllib3.exceptions.MaxRetryError, ConnectionError):
-        return jsonify({"error": "Servidor Alvo Está Indisponível!"}), 503 # Erro 503: Service Unavailable.
-    except Timeout:
-        return jsonify({"error": "Timeout!"}), 504 # Erro 504: Gateway Timeout.
-    except HTTPError as e:
-        status_code = e.response.status_code if e.response else 500 # Erro do HTTP ou Erro Genérico.
-        reason = e.response.reason if e.response else "Erro Desconhecido" # Razão do Erro ou Razão Desconhecida.
-        return jsonify({"error": f"Erro HTTP: '{reason}'"}), status_code
-    except RequestException:
-        return jsonify({"error": "Erro Genérico!"}), 500 # Erro 500: Internal Server Error.
-
-# Agendando as Reservas de um Veículo Específico, de Acordo com a Rota (Servidor-Servidor):
+# Rota Para Agendar as Reservas de um Veículo Específico, de Acordo com a Lista da Rota de Reservas (Servidor-Servidor):
 @app.route('/reservation', methods=['POST'])
-def create_reservation():
+def createReservations():
+    # Tratando os Dados Recebidos:
     data = request.json # Recebendo os Dados em um Dicionário: data = {vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, reservationsRoute: list}.
     vehicleID = data.get('vehicleID') # ID do Veículo.
     actualBatteryPercentage = data.get('actualBatteryPercentage') # Porcentagem Atual de Bateria do Veículo.
@@ -61,7 +41,13 @@ def create_reservation():
         print("Erro: A Lista da Rota das Reservas Está Vazia!\n")
         return jsonify({"error": "A Lista da Rota das Reservas Está Vazia!"}), 400  # Erro 400: Bad Request - Dados Enviados Errados ou Incompletos.
     
-    bookedReservations = [] # Onde Serão Salvas Todas as Reservas Realizadas, Deste Servidor e dos Outros.
+    # Exibindo as Informações das Reservas Solicitadas:
+    print(f"Dados do Veículo '{vehicleID}' Recebidos para Reservas em:\n")
+    for city in reservationsRoute:
+        print(f"Cidade: {city['name']} | Empresa: {city['company']}\n")
+    
+    bookedReservations = [] # Onde Serão Salvas Todas as Reservas Realizadas, Deste Servidor e dos Outros, Para Serem Retornadas.
+
     # Se a Primeira Cidade da Lista de Rotas de Reservas Não For Administrada Por Este Servidor
     # a Lista de Reservas Será Repassada Para o Servidor Correto:
     if reservationsRoute[0]["company"] != companyName.lower():
@@ -78,15 +64,10 @@ def create_reservation():
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
     
-    # Exibindo as Informações das Reservas Solicitadas:
-    print(f"Dados do Veículo '{vehicleID}' Recebidos para Reservas em:\n")
-    for city in reservationsRoute:
-        print(f"Cidade: {city['name']} | Empresa: {city['company']}\n")
-    
-    # Copiando as Reservas Destinadas a Esta Empresa:
+    # Copiando as Reservas Destinadas ao Servidor Desta Empresa:
     serverReservations = [city for city in reservationsRoute if city["company"] == f"{companyName.lower()}"] # Reservas Para Este Servidor.
 
-    # Removendo as Reservas Destinadas a Esta Empresa da Lista Que Será Passada Para os Outros Servidores:
+    # Isolando as Reservas Destinadas aos Servidores das Outras Empresas:
     reservationsRoute = [city for city in reservationsRoute if city["company"] != f"{companyName.lower()}"] # Reservas Para os Outros Servidores.
 
     # Verificando Se Existem Postos de Recarga Cadastrados Neste Servidor:
@@ -95,7 +76,7 @@ def create_reservation():
         return jsonify({"error": "Não Existem Postos de Recarga Cadastrados Neste Servidor!"}), 404  # Erro 404: Not Found - Recurso Não Encontrado.
     
     # Realizando as Reservas Deste Servidor.
-    # Procurando os Postos de Recarga Que Atuam nas Cidades:
+    # Procurando os Postos de Recarga Que Atuam nas Cidades Solicitadas:
     for cs in chargingStationsData.chargingStationsList:
         for city in serverReservations:
             if cs["city_codename"] == city["codename"]:
@@ -111,15 +92,15 @@ def create_reservation():
                     # Verificando Se a Reserva Foi Realizada:
                     if not currentReservation:
                         print(f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}'\n")
-                        return jsonify({"error": f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}"}), 404
+                        return jsonify({"error": f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}"}), 404 # Erro 404: Not Found
                     else:
-                        bookedReservations.append(currentReservation) # Salvando a Reserva Realizada na Cidade na Lista de Reservas.
+                        bookedReservations.append(currentReservation) # Salvando a Reserva na Lista de Reservas Que Será Retornada.
     
     # Retornando as Reservas, Se Não Houveram Mais Reservas Para Outros Servidores:
     if not reservationsRoute:
         return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
     
-    # Repassando as Reservas dos Outros Servidores:
+    # Repassando as Reservas Que Sobraram Para os Outros Servidores:
     else:
         response, status_code = sendReservationsToOtherServers(data, reservationsRoute)
         # Se Não Conseguir Reservas em Outros Servidores, Nenhum Reserva Será Realizada:
@@ -134,17 +115,17 @@ def create_reservation():
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
 
-# Criando a Rota para Ler as Reservas de um Veículo Específico (Servidor-Servidor):
+# Rota para Ler as Reservas de um Veículo Específico (Servidor-Servidor):
 @app.route('/reservation', methods=['GET'])
-def read_reservations():
+def readReservations():
     vehicleID = request.args.get('vehicleID') # Salvando o ID Recebido com Parâmetro.
     print(f"ID do Veículo Recebido: {vehicleID}\n")
     foundedReservations = reservationsData.findReservations(int(vehicleID)) # Procurando pelas Reservas do Veículo.
     return jsonify(foundedReservations), 200 # Retornando Sucesso (200).
 
-# Criando a Rota para Excluir uma Reserva de um Veículo Específico (Servidor-Servidor):
+# Rota para Excluir uma Reserva de um Veículo Específico (Servidor-Servidor):
 @app.route('/reservation', methods=['DELETE'])
-def delete_reservation():
+def deleteReservations():
     data = request.json # Recebendo os Dados em JSON.
     reservationID = data.get('reservationID') # Salvando o ID da Reserva, Recebido pelo JSON.
     chargingStationID = data.get('chargingStationID') # Salvando o ID do Posto de Recarga, Recebido pelo JSON.
@@ -156,6 +137,10 @@ def delete_reservation():
 
 # Rodando o Servidor no IP da Máquina:
 if __name__ == '__main__':
-    SERVER_IP = os.environ.get(f'{companyName.upper()}_SERVER_IP') # IP Definido no Docker-Compose.
-    SERVER_PORT = int(os.environ.get(f'{companyName.upper()}_SERVER_PORT')) # Porta Definida no Docker-Compose.
-    app.run(host=SERVER_IP, port=SERVER_PORT, debug=True)
+    # Iniciando o MQTT em Outra Thread:
+    mqtt_thread = threading.Thread(target=startMQTT) # Configurando a Thread do MQTT.
+    mqtt_thread.daemon = True # Thread "Daemon" Que Se Encerrará Junto Com o Servidor.
+    mqtt_thread.start() # Iniciando a Thread do MQTT.
+
+    # Iniciando o Servidor HTTP (Flask):
+    app.run(host=SERVER_IP, port=SERVER_PORT, debug=True, threaded=True) # Threaded = O Flask Pode Tratar Múltiplas Requisições Ao Mesmo Tempo.
