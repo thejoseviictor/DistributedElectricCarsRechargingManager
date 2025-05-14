@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+import json
 
 BROKER_IP = "localhost"
 BROKER_PORT = 1883
@@ -28,7 +29,7 @@ reservationData = {
     "departureCityCodename": "v_conquista",
     "arrivalCityCodename": "e_cunha"
 }
-client.publish(TOPIC_PUBLISHER, str(reservationData))
+client.publish(TOPIC_PUBLISHER, json.dumps(reservationData))
 
 try:
     while True:
