@@ -44,8 +44,8 @@ class VehicleClient:
                 reconections += 1
                 time.sleep(2) 
 
-                if reconections == 2: 
-                    print("Falha nas " , reconections + 1 ,  "tentativas de conexão : Sistema indisponivel ")
+                if reconections == 3: 
+                    print("Falha nas " , reconections ,  "tentativas de conexão : Sistema indisponivel ")
         
     
     def sendRequest(self, vehicle: Vehicle, Route: list[str]): # Envia uma requisição e dados do client (Veículo) para o servidor (Nuvem).
@@ -56,8 +56,8 @@ class VehicleClient:
                 "vehicleID": vehicle.vid ,
                 "actualBatteryPercentage": vehicle.currentEnergy ,
                 "batteryCapacity" : vehicle.maximumBattery ,
-                "departureCityCodename" : Route(0) ,
-                "arrivalCityCodename" : Route(1)
+                "departureCityCodename" : Route[0] ,
+                "arrivalCityCodename" : Route[1]
             }
 
             # Cria um json baseado no dicionário "vData" e envia as informações para o servidor correspondente.
