@@ -96,7 +96,9 @@ def connectToBroker(client):
             break
         except ConnectionRefusedError:
             print("Conexão Com o Broker Recusada! Tentando Novamente em 3 Segundos...\n")
-            time.sleep(3)
+        except Exception as e:
+            print(f"Erro ao Conectar-se ao Broker: '{e}'\nTentando Novamente em 3 Segundos...\n")
+        time.sleep(3)
 
 # Função "callback" ao Conectar-se ao Broker MQTT:
 def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
@@ -109,7 +111,8 @@ def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
 def onDisconnect(client, userdata, rc):
     if rc != 0:
         print("Conexão Com o Broker Perdida!\n")
-        client.loop_stop() # Finalizando o Loop da Conexão Anterior.
+        client.loop_stop(force=True) # Finalizando o Loop da Conexão Anterior.
+        time.sleep(1) # Aguardando 1 Segundo Até Tentar uma Nova Conexão.
         connectToBroker(client)
         client.loop_start() # Iniciando o Loop de Recebimento das Mensagens.
 
