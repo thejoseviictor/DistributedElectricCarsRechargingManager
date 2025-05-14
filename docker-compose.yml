@@ -23,9 +23,4 @@ services:
     # depends_on: # Depende do host "cloud"
     #  - cloud
 
-    networks: # Definindo a network que será usada
-      - recharging_manager
-
-networks:
-  recharging_manager:
-    external: true
+    network_mode: host
