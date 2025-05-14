@@ -91,6 +91,9 @@ def mqttDeleteReservations(client, action: str, vehicleData: dict):
 def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
     if rc == 0:
         print("Conectado ao Broker Com Sucesso!\n")
+        # Increvendo o Servidor nos Tópicos do MQTT:
+        for topic in MQTT_TOPICS_SUBSCRIBER:
+            client.subscribe(topic)
     else:
         print(f"Falha na Conexão Com o Broker! Código de Retorno: {rc}\n")
 
@@ -156,7 +159,4 @@ def startMQTT():
     # Configurações de Conexão Com o Broker:
     client.reconnect_delay_set(min_delay=3,max_delay=30) # Tempo de Reconexão.
     client.connect_async(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conexão Assíncrona Com o Broker, Com "Keep Alive" (Avisos) de 60 Segundos.
-    # Increvendo o Servidor nos Tópicos do MQTT:
-    for topic in MQTT_TOPICS_SUBSCRIBER:
-        client.subscribe(topic)
     client.loop_start() # Iniciando o Loop de Recebimento das Mensagens.
