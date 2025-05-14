@@ -24,9 +24,14 @@ class VehicleClient:
     serverIP: str
     serverPort: int
 
+    
+
 
     def connectMQTT(self):
-        
+
+        serverIP = 'localhost'
+        serverIP = 1883
+
         reconections = 0
         maxReconections = 3
 
@@ -35,7 +40,7 @@ class VehicleClient:
             try:
                 # Criando um client MQTT para o veículo
                 self.client = mqtt.Client(userdata=self.reservations)
-                self.client.connect(self.serverIP,self.serverPort)
+                self.client.connect(serverIP, serverPort)
                 print("Conexão ", reconections + 1, " : Conexão estabelecida com servidor " + self.nameCompanies(self.defineServer))
                 break
 
@@ -62,7 +67,7 @@ class VehicleClient:
 
             # Cria um json baseado no dicionário "vData" e envia as informações para o servidor correspondente.
             request = json.dumps(vData, indent=4).encode('utf-8')
-            self.client.publish("topico/reservation", request)
+            self.client.publish("vehicle/create_reservations/server", request)
 
         except Exception as e:
              print("Erro na reserva ou conexão indisponivel: " + e)
@@ -74,24 +79,21 @@ class VehicleClient:
         try:
             
             print("Conexão estabelecida, esperando resposta... ")
-            client.subscribe("topico/answer")
+            client.subscribe("server/create_reservations/vehicle")
             answer = json.loads(msg.payload.decode()) # transforma JSON string em lista de dicionarios
+            userdata.append(answer)
+            self.client.disconnect()
 
         except Exception as e:
             
             print(f"Erro na reserva ou conexão indisponivel:{type(e).__name__}: {e}")
-            
-          
-        userdata.append(answer)
-
-        self.client.disconnect()
 
 
     def waitInformation(self, vehicle: Vehicle):
         
         utility = VehicleUtility()
 
-        self.client.on_message = self.receiveReservation(vehicle)
+        self.client.on_message = self.receiveReservation
         self.client.subscribe("topico/answer")
         
         print("Aguardando resposta ...")
@@ -130,7 +132,3 @@ class VehicleClient:
                 self.nameCompanie = str(s["nameServer"])
                 self.serverIP = str(s["ip"])
                 self.serverPort = int(s["port"])
-
-        print("IP: " + self.serverIP)
-        print("IP: " + self.serverPort)
-        time.sleep(6)
