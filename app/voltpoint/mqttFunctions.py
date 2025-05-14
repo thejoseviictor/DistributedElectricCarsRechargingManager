@@ -4,9 +4,10 @@
 import os # Para Usar Variáveis de Ambiente.
 import json # Para Printar os Erros.
 import requests # Para Comunicação com Outros Servidores.
+import paho.mqtt.client as mqtt # Funções do MQTT.
+import time # Para o Loop de Tentativa de Conexão Com o Broker.
 from Server import SERVER_IP, SERVER_PORT # IP e Porta do Servidor.
 from Utils import handleHTTPExceptions # Exceções Para Problemas de Conexão.
-import paho.mqtt.client as mqtt # Funções do MQTT.
 import ReservationHelper # Funções para Gerar Parâmetros para Reservas.
 
 # Salvando as Informações do MQTT:
@@ -141,7 +142,15 @@ def startMQTT():
     client = mqtt.Client() # Salvando o Cliente MQTT.
     client.on_connect = onConnect # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Conectar-se ao Broker.
     client.on_message = onMessage # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Receber uma Mensagem.
-    client.connect(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conectando ao BROKER, Com "Keep Alive" (Avisos) de 60 Segundos.
+    # Tentando Conectar ao Broker:
+    while True:
+        try:
+            print("Tentando Conectar ao Broker...\n")
+            client.connect(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conectando ao BROKER, Com "Keep Alive" (Avisos) de 60 Segundos.
+            break
+        except ConnectionRefusedError:
+            print("Conexão Com o Broker Recusada! Tentando Novamente em 3 Segundos...\n")
+            time.sleep(3)  
     # Increvendo o Servidor nos Tópicos do MQTT:
     for topic in MQTT_TOPICS_SUBSCRIBER:
         client.subscribe(topic)
