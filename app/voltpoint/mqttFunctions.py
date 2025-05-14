@@ -87,19 +87,6 @@ def mqttGetReservations(client, action: str, vehicleData: dict):
 def mqttDeleteReservations(client, action: str, vehicleData: dict):
     pass
 
-# Usada Para Conectar ou Reconectar ao Broker:
-def connectToBroker(client):
-    while True:
-        try:
-            print("Tentando Conectar ao Broker...\n")
-            client.connect(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conectando ao BROKER, Com "Keep Alive" (Avisos) de 60 Segundos.
-            break
-        except ConnectionRefusedError:
-            print("Conexão Com o Broker Recusada! Tentando Novamente em 3 Segundos...\n")
-        except Exception as e:
-            print(f"Erro ao Conectar-se ao Broker: '{e}'\nTentando Novamente em 3 Segundos...\n")
-        time.sleep(3)
-
 # Função "callback" ao Conectar-se ao Broker MQTT:
 def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
     if rc == 0:
@@ -110,11 +97,7 @@ def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
 # Função "callback" ao Perder Conexão Com o Broker MQTT:
 def onDisconnect(client, userdata, rc):
     if rc != 0:
-        print("Conexão Com o Broker Perdida!\n")
-        client.loop_stop(force=True) # Finalizando o Loop da Conexão Anterior.
-        time.sleep(1) # Aguardando 1 Segundo Até Tentar uma Nova Conexão.
-        connectToBroker(client)
-        client.loop_start() # Iniciando o Loop de Recebimento das Mensagens.
+        print("Conexão Com o Broker Perdida! Tentando Reconectar...\n")
 
 # Função "callback" ao Receber uma Mensagem do MQTT:
 def onMessage(client, userdata, message): # Assinatura Padrão da Função.
@@ -165,8 +148,9 @@ def startMQTT():
     client.on_connect = onConnect # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Conectar-se ao Broker.
     client.on_disconnect = onDisconnect # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Perder Conexão Com o Broker.
     client.on_message = onMessage # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Receber uma Mensagem.
-    # Tentando Conectar ao Broker:
-    connectToBroker(client)
+    # Configurações de Conexão Com o Broker:
+    client.reconnect_delay_set(min_delay=3,max_delay=30) # Tempo de Reconexão.
+    client.connect_async(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conexão Assíncrona Com o Broker, Com "Keep Alive" (Avisos) de 60 Segundos.
     # Increvendo o Servidor nos Tópicos do MQTT:
     for topic in MQTT_TOPICS_SUBSCRIBER:
         client.subscribe(topic)
