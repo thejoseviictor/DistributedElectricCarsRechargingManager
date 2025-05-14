@@ -64,7 +64,8 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
             if response.ok: # Atalho Para os Status de Sucesso, de 200 até 300.
                 result = response.json() # Convertendo a Resposta do Flask Para Dicionário.
                 client.publish(publisherTopic, str(result)) # Enviando a Resposta no MQTT como String.
-                print(f"Resposta Enviada Via MQTT: {result}\n")
+                print("Resposta Enviada Via MQTT:\n")
+                print(json.dumps(result, indent=4)) # Mensagem Identada.
             else:
                 try:
                     errorMessage = response.json().get("error") # Copiando a Mensagem de Erro do HTTP.
@@ -106,7 +107,8 @@ def onDisconnect(client, userdata, rc):
 def onMessage(client, userdata, message): # Assinatura Padrão da Função.
     # Manipulando a Mensagem:
     decodedMessage = message.payload.decode() # Decodificando a Mensagem, Convertendo Bytes em String.
-    print(f"Mensagem MQTT Recebida: {decodedMessage}\n")
+    print("Mensagem MQTT Recebida:\n")
+    print(json.dumps(decodedMessage, indent=4)) # Mensagem Identada.
     jsonMessage = json.loads(decodedMessage) # Transformando a Mensagem em Dicionário.
 
     # Salvando o Tópico e Separando a Ação:
