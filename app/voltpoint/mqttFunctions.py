@@ -133,7 +133,7 @@ def onMessage(client, userdata, message): # Assinatura Padrão da Função "call
 def startMQTT():
     client = mqtt.Client() # Salvando o Cliente MQTT.
     client.on_message = onMessage # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Receber uma Mensagem.
-    client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT, 60) # Conectando ao BROKER, Com "Keep Alive" (Avisos) de 60 Segundos.
+    client.connect(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conectando ao BROKER, Com "Keep Alive" (Avisos) de 60 Segundos.
     # Increvendo o Servidor nos Tópicos do MQTT:
     for topic in MQTT_TOPICS_SUBSCRIBER:
         client.subscribe(topic)
