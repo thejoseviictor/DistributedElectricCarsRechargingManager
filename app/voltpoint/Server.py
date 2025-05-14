@@ -88,7 +88,8 @@ def createReservations():
                     return jsonify({"error": "Não Existem Pontos de Carregamento Cadastrados Neste Servidor!"}), 404  # Erro 404: Not Found - Recurso Não Encontrado.
                 else:
                     # Realizando uma Reserva na Cidade:
-                    currentReservation = reservationsData.createReservation(chargingStationID, chargingPointID, vehicleID, actualBatteryPercentage, batteryCapacity)
+                    currentReservation = reservationsData.createReservation(chargingStationID, chargingPointID, city["name"], city["codename"],
+                                                                            companyName, vehicleID, actualBatteryPercentage, batteryCapacity)
                     # Verificando Se a Reserva Foi Realizada:
                     if not currentReservation:
                         print(f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}'\n")
