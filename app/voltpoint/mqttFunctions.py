@@ -86,8 +86,15 @@ def mqttGetReservations(client, action: str, vehicleData: dict):
 def mqttDeleteReservations(client, action: str, vehicleData: dict):
     pass
 
+# Função "callback" ao Conectar-se ao Broker MQTT:
+def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
+    if rc == 0:
+        print("Conectado ao Broker Com Sucesso!\n")
+    else:
+        print(f"Falha na Conexão Com o Broker! Código de Retorno: {rc}\n")
+
 # Função "callback" ao Receber uma Mensagem do MQTT:
-def onMessage(client, userdata, message): # Assinatura Padrão da Função "callback".
+def onMessage(client, userdata, message): # Assinatura Padrão da Função.
     # Manipulando a Mensagem:
     decodedMessage = message.payload.decode() # Decodificando a Mensagem, Convertendo Bytes em String.
     print(f"Mensagem MQTT Recebida: {decodedMessage}\n")
@@ -132,6 +139,7 @@ def onMessage(client, userdata, message): # Assinatura Padrão da Função "call
 # Configurando e Iniciando o MQTT:
 def startMQTT():
     client = mqtt.Client() # Salvando o Cliente MQTT.
+    client.on_connect = onConnect # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Conectar-se ao Broker.
     client.on_message = onMessage # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Receber uma Mensagem.
     client.connect(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conectando ao BROKER, Com "Keep Alive" (Avisos) de 60 Segundos.
     # Increvendo o Servidor nos Tópicos do MQTT:
