@@ -7,11 +7,14 @@ from ChargingPointsFile import ChargingPointsFile
 
 class Reservation:
     # Inicializando a Classe e seus Atributos:
-    def __init__(self, reservationID: int, chargingStationID: int, chargingPointID: int, chargingPointPower: float, kWhPrice: float, 
-                 vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, lastReservationFinishDateTime):
+    def __init__(self, reservationID: int, chargingStationID: int, chargingPointID: int, cityName: str, cityCodename: str, companyName: str, chargingPointPower: float,
+                 kWhPrice: float, vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, lastReservationFinishDateTime):
         self.reservationID = reservationID    # ID da Reserva.
         self.chargingStationID = chargingStationID  # ID do Posto de Recarga.
         self.chargingPointID = chargingPointID  # ID do Ponto de Carregamento.
+        self.cityName = cityName # Nome da Cidade.
+        self.cityCodename = cityCodename # Apelido da Cidade.
+        self.companyName = companyName # Nome da Empresa.
         self.chargingPointPower = chargingPointPower # Potência do Ponto de Carregamento em Watt.
         self.kWhPrice = kWhPrice    # Preço do kWh do Ponto de Carregamento.
         self.vehicleID = vehicleID  # ID do Veículo.
@@ -124,7 +127,8 @@ class ReservationsFile:
         return startID
     
     # Criando uma Reserva e Salvando no Arquivo ".json":
-    def createReservation(self, chargingStationID: int, chargingPointID: int, vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float):
+    def createReservation(self, chargingStationID: int, chargingPointID: int, cityName: str, cityCodename: str, companyName: str,
+                          vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float):
         self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         # Buscando Informações do Ponto de Carregamento Selecionado:
         cp = ChargingPointsFile() # cp = Charging Point.
@@ -140,13 +144,16 @@ class ReservationsFile:
             if lastReservationFinishDateTime is None:
                 lastReservationFinishDateTime = datetime.datetime.now().isoformat()
             # Gerando o Objeto da Reserva:
-            reservationObj = Reservation(reservationID, chargingStationID, chargingPointID, chargingPointPower, kWhPrice, 
-                                            vehicleID, actualBatteryPercentage, batteryCapacity, lastReservationFinishDateTime)
+            reservationObj = Reservation(reservationID, chargingStationID, chargingPointID, cityName, cityCodename, companyName, chargingPointPower,
+                                         kWhPrice, vehicleID, actualBatteryPercentage, batteryCapacity, lastReservationFinishDateTime)
             # Salvando as Informações da Reserva na Lista:
             createdReservation = ({
                 "reservationID": reservationObj.reservationID, 
                 "chargingStationID": reservationObj.chargingStationID, 
                 "chargingPointID": reservationObj.chargingPointID, 
+                "cityName": reservationObj.cityName, 
+                "cityCodename": reservationObj.cityCodename, 
+                "companyName": reservationObj.companyName, 
                 "chargingPointPower": reservationObj.chargingPointPower, 
                 "kWhPrice": reservationObj.kWhPrice, 
                 "vehicleID": reservationObj.vehicleID, 
