@@ -16,13 +16,13 @@ MQTT_BROKER_PORT = os.environ.get('MQTT_BROKER_PORT') # Variável de Ambiente do
 # Salvando os Tópicos "Subscriber" e "Publisher":
 # Formato Reconhecido = "from/action/to"
 MQTT_TOPICS_SUBSCRIBER = {
-    "vehicle/create_reservations/server"
-    "vehicle/get_reservations/server"
+    "vehicle/create_reservations/server",
+    "vehicle/get_reservations/server",
     "vehicle/delete_reservations/server"
 }
 MQTT_TOPICS_PUBLISHER = {
-    "server/create_reservations/vehicle"
-    "server/get_reservations/vehicle"
+    "server/create_reservations/vehicle",
+    "server/get_reservations/vehicle",
     "server/delete_reservations/vehicle"
 }
 
