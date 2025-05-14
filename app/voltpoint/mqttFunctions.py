@@ -111,6 +111,7 @@ def onMessage(client, userdata, message): # Assinatura Padrão da Função.
     jsonMessage = json.loads(decodedMessage) # Transformando a Mensagem em Dicionário.
     print("Mensagem MQTT Recebida:\n")
     print(json.dumps(jsonMessage, indent=4)) # Mensagem Identada.
+    print("\n")
 
     # Salvando o Tópico e Separando a Ação:
     topic = message.topic.split("/") # Salvando as Partes do Tópico em uma Lista: ["from", "action", "to"]
