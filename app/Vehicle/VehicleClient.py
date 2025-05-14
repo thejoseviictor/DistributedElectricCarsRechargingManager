@@ -20,30 +20,10 @@ class VehicleClient:
     reservations = []
     defineServer: int
 
-    
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))  # Identificando a rota atual
-    ip = s.getsockname()[0] # Guardando ip da máquina utilizada
-    s.close()
+    nameCompanie: str
+    serverIP: str
+    serverPort: int
 
-    print("IP: " + ip)
-    time.sleep(6)
-
-    base = os.path.dirname(os.path.abspath(__file__)) # Pegando o caminho absoluto do arquivo
-    filePathServer = os.path.join(base, "dataPath", "brokers.json")# Variavel que guarda o caminho do arquivo "data.json"
-    
-    with open(filePathServer, 'r') as f:
-            data = json.load(f)
-
-    for s in data :
-        if str(data["ip"]) == ip:
-            nameCompanie = str(s["nameServer"])
-            serverIP = str(s["ip"])
-            serverPort = int(s["port"])
-
-    print("IP: " + serverIP)
-    print("IP: " + serverPort)
-    time.sleep(6)
 
     def connectMQTT(self):
         
@@ -77,8 +57,7 @@ class VehicleClient:
                 "actualBatteryPercentage": vehicle.currentEnergy ,
                 "batteryCapacity" : vehicle.maximumBattery ,
                 "departureCityCodename" : Route(0) ,
-                "arrivalCityCodename" : Route(1) ,
-                "scheduleReservation" : True
+                "arrivalCityCodename" : Route(1)
             }
 
             # Cria um json baseado no dicionário "vData" e envia as informações para o servidor correspondente.
@@ -132,3 +111,26 @@ class VehicleClient:
         vehicle.updateCredit(cost)
 
         return True
+
+    def defineIP(self):
+        
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))  # Identificando a rota atual
+        ip = s.getsockname()[0] # Guardando ip da máquina utilizada
+        s.close()
+
+        base = os.path.dirname(os.path.abspath(__file__)) # Pegando o caminho absoluto do arquivo
+        filePathServer = os.path.join(base, "dataPath", "brokers.json")# Variavel que guarda o caminho do arquivo "data.json"
+        
+        with open(filePathServer, 'r') as f:
+                data = json.load(f)
+
+        for s in data :
+            if str(data["ip"]) == ip:
+                self.nameCompanie = str(s["nameServer"])
+                self.serverIP = str(s["ip"])
+                self.serverPort = int(s["port"])
+
+        print("IP: " + self.serverIP)
+        print("IP: " + self.serverPort)
+        time.sleep(6)

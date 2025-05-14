@@ -15,32 +15,44 @@ do código, e estou ciente que estes trechos não serão considerados para fins 
 
 ''' Classe main do veiculo'''
 
+#--------------------------------------------------------------------------------------------------------------
+
 from faker import Faker # Biblioteca utilizada para a geração de dados fictícios
+
 import time # Biblioteca usada para fluxos e simulações de tempo
 import random # Biblioteca usada para gerar dados e valores aleatórios
+import re  # Biblioteca que permite buscas, substituições e manipulação em str
 
-'''
-Bibliotecas usadas para trabalhar com o fluxo entre diretórios e entradas 
-e saidas diretamente com o sistema/terminal
-'''
-import sys 
-import os 
+import sys # Bibliotecas usadas para trabalhar com caminhos, fluxo entre diretórios e entradas 
+import os  # e saidas diretamente com o sistema/terminal
+from pathlib import Path
 
+import turtle
 import json # Biblioteca usada para trabalhar com arquivos .json e importar dados fictícios para o sistema
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-# Importação de classes base para o funcionamnto do sisteema
+#--------------------------------------------------------------------------------------------------------------
+
+# Importação de classes base para o funcionamnto do sistema:
+
 from Vehicle import Vehicle
 from VehicleUtility import VehicleUtility
 from User import User
 from VehicleClient import VehicleClient
 
-repeat = True # Variavel usada para lidar com o fluxo de repetição do programa
+#--------------------------------------------------------------------------------------------------------------
 
-base = os.path.dirname(os.path.abspath(__file__)) # Pgando o caminho absoluto do arquivo
-filePathReservations= os.path.join(base, "dataPath", "arquivo.json") # Variavel que guarda o caminho do arquivo "reservations.json"
+# Variaveis usadas para fluxo entre caminhos e diretórios de pastas e arquivos de persistência de dados
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))) # Adiciona dinamicamente o diretório absoluto em sys.path
+
+BASE_DIR = Path(__file__).resolve().parent # Caminho do script "main.py"
+DATA_PATH = BASE_DIR / 'dataPath' # Caminho da pasta "dataPath"
+
+#Definindo o caminho de cada arquivo de dados
+dataFilePath = DATA_PATH / 'data.json'
+reservationsFilePath = DATA_PATH / 'reservations.json'
+brokersFilePath = DATA_PATH / 'brokers.json'
 
 # Métodos utilitários --------------------------------------------------------------------------
 
@@ -51,117 +63,138 @@ utility = VehicleUtility()
 
 #------------------------------------------------------------------------------------------------
 
-
 # Início do sistema
 
+repeat = True # Variavel usada para lidar com o fluxo de repetição do programa
 firstLogin = True # Variavel para indicar que apenas um login é preciso.
 
 while(repeat):
 
     utility.clearTerminal()
 
-    print(" ---------- veHI : Sistema de recarga para veículos elétricos ----------\n")
+    utility.startAnimation() # Função para gerar uma pequena animação de inicio do programa
     
-    time.sleep(3)
-    utility.clearTerminal()
-
     print(" Bem vindo(a)! \n")
     time.sleep(2)
 
-    userType = input("\t 1 - LOGIN / ENTRAR NA CONTA \n \t 2 - CRIAR CONTA \n")
-    utility.clearTerminal()
+    wrongOption = True # Variavel para determinar se o 
 
-    wrongDate = True  # Váriavel usada para permitir ou não a entrada no sistema de acordo com os dados de login e senha
+    while wrongOption:
 
-    if userType == 1 :
-        
-        if(firstLogin):
+        userType = input("\t 1 - LOGIN / ENTRAR NA CONTA \n \t 2 - CRIAR CONTA \n\t ->")
+        utility.clearTerminal()
 
-            ''' 
-            Os dados são carregados de data.json, a partir da ultima geração de dados ficticios
-            obs: O arquivo "data.json" tem os dados salvos
-            '''
-            vehicle = Vehicle()
-            vehicle.loadingData()
+        wrongData = True  # Váriavel usada para permitir ou não a entrada no sistema de acordo com os dados de login e senha
 
-            #------------------------------------------------------------------------------------
-            while(wrongDate):
-
-                login = input("LOGIN (CPF ou Email): \t ")
-                utility.clearTerminal()
-                password = input("SENHA: \t ")
-                utility.clearTerminal()
+        if userType == "1" :
+            
+            #Criando template das 2 classes, para serem preenchidas com os dados 
+            ownerTemplate = User(cpf="", name="", email="", password="")
+            vehicle = Vehicle( vid= "", owner=ownerTemplate, licensePlate="", moneyCredit=0.0, currentEnergy=0, criticalEnergy=0, distanceFromDestination=0, distanceFromChargingStation=0, maximumBattery=0)
+            
+            vehicle.loadingData(dataFilePath, reservationsFilePath)
 
 
-                if (login == vehicle.owner.cpf or login == vehicle.owner.email) and password == vehicle.owner.password:
-                    print (" Login realizado com sucesso ! ")
-                    time.sleep(3)
+            if firstLogin :
+
+                '''
+                Os dados são carregados de data.json, a partir da ultima geração de dados ficticios
+                obs: O arquivo "data.json" tem os dados salvos
+                '''
+                #------------------------------------------------------------------------------------
+                
+                while(wrongData):
+
+                    print(vehicle.owner.__dict__) # Printando as informações necessárias para LOGIN
+                    login = input("\n LOGIN (CPF ou Email): \t ")
                     utility.clearTerminal()
-                    wrongDate = False
-                    firstLogin = False
 
-                else :
-                    print(" Login ou senha incorreta. Tente novamente !")
-                    time.sleep(3)
+                    print(vehicle.owner.__dict__)
+                    password = input("\n SENHA: ")
                     utility.clearTerminal()
-                    wrongDate = True
- 
-    if userType == 2 :
 
-        # Definindo os objetos e as suas informações:
 
-        fake = Faker("pt_BR") # Biblioteca usada para gerar dados aleatórios para usuário e veiculo
+                    if (login == vehicle.owner.cpf or login == vehicle.owner.email) and password == vehicle.owner.password:
+                        print (" Login realizado com sucesso ! ")
+                        time.sleep(3)
+                        utility.clearTerminal()
+                        wrongData = False
+                        firstLogin = False
+
+                    else :
+                        print(" Login ou senha incorreta. Tente novamente !")
+                        time.sleep(3)
+                        utility.clearTerminal()
+                        wrongData = True
+
+            wrongOption = False
+
+        elif userType == "2" :
+
+            # Definindo os objetos e as suas informações:
+
+            fake = Faker("pt_BR") # Biblioteca usada para gerar dados aleatórios para usuário e veiculo
+            
+            # User ----------------------------------------------------------------------------------------------------------------
+
+            cpf = re.sub(r'\D', '', fake.cpf())
+            
+
+            genericFirstName = fake.first_name()
+            genericLastName = fake.last_name()
+            name = genericFirstName + " " + genericLastName
+            
+
+            # Lista e variavel para determinar um domínio aleatório para o email
+            genericDomain = ["@gmail.com", "@outlook.com", "@hotmail.com", "@yahoo.com", "@bol.com"]
+            randomDomain = random.randint(0,4)
+
+            email = re.sub(r"\s+", "", genericFirstName.lower() + "." + genericLastName.lower() + genericDomain[randomDomain])
+
+            # Senha aleatória 
+            password = fake.password(length=8, special_chars=True, digits=True, upper_case=True, lower_case=True)
+            # Parâmetros: Tamanho(8), caracteres especiais(s), números(s), letras maiusculas(s), letras minusculas(s)
+
+            user = User(cpf = cpf, name = name, email = email , password = password)
+
+
+            # Vehicle -------------------------------------------------------------------------------------------------------------
+
+            genericID = random.randint(1,99999) # Gera um ID aleatório de 5 dígitos para o veículo
+            vid = str(genericID).zfill(5)
+
+            owner = user
+            licensePlate = fake.license_plate()
+            moneyCredit = round(10000, 2) # O valor de crédito do veiculo inicia com R410.000
+            currentEnergy = 100
+            criticalEnergy = 20 # Foi definido que a energia critica do veículo é 20%
+
+            maximumBattery = random.randint(30,50) # A capacidade máxima da bateria é gerada aleatoriamente entre o valor de 30 a 50 (kWh) 
+
+            vehicle = Vehicle(vid = vid, owner = owner, licensePlate = licensePlate, moneyCredit = moneyCredit, currentEnergy = currentEnergy, criticalEnergy = criticalEnergy, distanceFromDestination = 0, distanceFromChargingStation = 0, maximumBattery = maximumBattery)
+
+            # ---------------------------------------------------------------------------------------------
+
+            reservations = []
+
+            with open(reservationsFilePath, 'w') as f: # Limpando as reservas da conta anterior do arquivo "reservations.json" 
+                json.dump(reservations, f, indent=4)
+
+            # ---------------------------------------------------------------------------------------------
         
-        # User ----------------------------------------------------------------------------------------------------------------
+            vehicle.savingLoginData(dataFilePath) # Salvando os dados pertinentes
+            # obs: O arquivo "data.json" tem os dados salvos
 
-        cpf = fake.cpf(False) # Por padrão, .cpf() tem como paramêtro TRUE, o que determina o cpf com formatações(com . e -) 
-
-        genericFirstName = fake.first_name()
-        genericLastName = fake.last_name()
-        name = genericFirstName + " " + genericLastName
-
-        # Lista e variavel para determinar um domínio aleatório para o email
-        genericDomain = ["@gmail.com", "@outlook.com", "@hotmail.com", "@yahoo.com", "@bol.com"]
-        randomDomain = random.randint(0,4)
-
-        email = genericFirstName.lower() + "." + genericLastName.lower() + genericDomain(randomDomain)
-
-        # Senha aleatória 
-        password = fake.password(length=8, special_chars=True, digits=True, upper_case=True, lower_case=True)
-        # Parâmetros: Tamanho(8), caracteres especiais(s), números(s), letras maiusculas(s), letras minusculas(s)
-
-        user = User(cpf = cpf, name = name, email = email , password = password)
-
-
-        # Vehicle -------------------------------------------------------------------------------------------------------------
-
-        genericID = random.randint(1,99999) # Gera um ID aleatório de 5 dígitos para o veículo
-        vid = str(genericID).zfill(5)
-
-        owner = user
-        licensePlate = fake.license_plate()
-        moneyCredit = round(random.uniform(100.0, 1000.0), 2)
-        currentEnergy = 100
-        criticalEnergy = 20 # Foi definido que a energia critica do veículo é 20%
-
-        maximumBattery = random.randint(30,50) # A capacidade máxima da bateria é gerada aleatoriamente entre o valor de 30 a 50 (kWh) 
-
-        vehicle = Vehicle(vid = vid, owner = owner, licensePlate = licensePlate, moneyCredit = moneyCredit, currentEnergy = currentEnergy, criticalEnergy = criticalEnergy, distanceFromDestination = 0, distanceFromChargingStation = 0, maximumBattery = maximumBattery)
-
-        # ---------------------------------------------------------------------------------------------
-        
-        open(filePathReservations, "w").close() # Limpando as reservas da conta anterior do arquivo "reservations.json" 
-
-        # ---------------------------------------------------------------------------------------------
-    
-        vehicle.savingLoginDates() # Salvando os dados pertinentes
-        # obs: O arquivo "data.json" tem os dados salvos
-
-        # ---------------------------------------------------------------------------------------------
-
+            # ---------------------------------------------------------------------------------------------
+            
+            wrongOption = False
+            
+        else :
+            print("Digite uma opção válida !")
+            wrongOption = True
 
     print(" O que deseja fazer? \n")
-    reply = input(" Digite: \n 1. Fazer reserva \n 2. Ver histórico de reservas \n 3. Sair \n\n -> ")
+    reply = input(" Digite: \n\t 1. Fazer reserva \n\t 2. Ver histórico de reservas \n\t 3. Voltar para o inicio \n\t 4. Sair do programa \n\t -> ")
     utility.clearTerminal()
 
     '''
@@ -179,15 +212,34 @@ while(repeat):
 
     if reply == "1" :
 
-        print("\t Digite o local de origem: \n")
+        wrongCities = True
 
-        origin = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
-        utility.clearTerminal()
+        while wrongCities:
 
-        print("\t Digite o local de destino: \n")
-        destination = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
+            utility.clearTerminal()
 
-        route = utility.defineRoute(origin, destination)
+            print("\t Digite o local de origem: \n")
+            origin = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
+            
+            utility.clearTerminal()
+
+            print("\t Digite o local de destino: \n")
+            destination = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
+            
+            utility.clearTerminal()
+
+            route = utility.defineRoute(origin, destination)
+
+            if route == False:
+                print("\t Digite dados validos ! ")
+
+                time.sleep(3)
+                utility.clearTerminal()
+
+                wrongCities = True
+
+            else:
+                wrongCities = False
 
         vClient = VehicleClient()
         vClient.connectMQTT()
@@ -205,6 +257,7 @@ while(repeat):
 
     
     elif reply == "2" :
+
         vehicle.showReservation()
 
         reply = input("\n O que deseja agora: \n 1. Voltar para o início. \n 2. Fechar programa. \n ->")
@@ -217,6 +270,16 @@ while(repeat):
             repeat = False
             utility.endAnimation()
 
-    else:
+    elif reply == "3":
+        repeat = True
+
+    elif reply == "4":
         repeat = False
         utility.endAnimation()
+
+    else:
+        utility.clearTerminal()
+        print("Digite uma opção válida !")
+        time.sleep(3)
+        
+        

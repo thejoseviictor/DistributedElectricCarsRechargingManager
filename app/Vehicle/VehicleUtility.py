@@ -20,49 +20,97 @@ class VehicleUtility:
             time.sleep(1)
             self.clearTerminal()
     
-    def defineRoute(origin: str, destination: str): 
+    def defineRoute(self, origin: str, destination: str): 
+        
         '''
         Método responsável por determinar os codinomes das cidades de origem e de destino 
         baseado nas respostas do usuário
 
         '''
-        
         route = []
 
-        route[0] = origin
-        route[1] = destination
+        route.append(origin)
+        route.append(destination)
+
 
         for t in range( len(route) ) : 
 
             local = route[t]
 
-            match local: 
-
-                case "1":
-                    route[t] = "v_conquista"
+            if local == "1":
+                route[t] = "v_conquista"
                 
-                case "2":
-                    route[t] = "jequie"
+            elif local == "2":
+                route[t] = "jequie"
                 
-                case "3":
-                    route[t] = "feira"
+            elif local == "3":
+                route[t] = "feira"
                 
-                case "4":
+            elif local == "4":
                     route[t] = "e_cunha"
 
-                case "5":
-                    route[t] = "ibo"
+            elif local == "5":
+                route[t] = "ibo"
                 
-                case "6":
-                    route[t] = "barro"
+            elif local == "6":
+                route[t] = "barro"
                 
-                case "7":
-                    route[t] = "jaguaribe"
+            elif local == "7":
+                route[t] = "jaguaribe"
                 
-                case "8":
-                    route[t] = "russas"
+            elif local == "8":
+                route[t] = "russas"
                 
-                case "9":
-                    route[t] = "fortaleza"
+            elif local == "9":
+                route[t] = "fortaleza"
+                
+            else:
+                route[t] = "false"
         
+        if route[0] == "false" or route[1] == "false" :
+            return False
+
         return route
+    
+    def startAnimation(self):
+
+        title = "\t ------------- veHI : Sistema de recarga para veículos elétricos -------------\n"
+
+        # Listas que guardam o conjunto de emojis e símbolos (str) para realizar a animação inicial
+        animation = []
+        landscape = []
+
+        '''
+            Emojis utilizados:
+
+            - 💨 : \U0001F4A8
+            - 🚗 : \U0001F697
+            - 🌳 : \U0001F333
+            - ☀️ : \u2600\ufe0f
+            - ☁️ : \u2601\ufe0f
+         
+         
+        '''   
+        animation.append("\t ------------------------------------------------------------------------------ \n\t \t -- \t\t -- \t\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 \n \t ------------------------------------------------------------------------------")
+        animation.append("\t ------------------------------------------------------------------------------ \n\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
+        animation.append("\t ------------------------------------------------------------------------------ \n\t \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
+        animation.append("\t ------------------------------------------------------------------------------ \n\t \t -- \t\t -- \t\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 \n \t ------------------------------------------------------------------------------")
+        animation.append("\t ------------------------------------------------------------------------------ \n\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
+        animation.append("\t ------------------------------------------------------------------------------ \n\t \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
+        
+        landscape.append("\t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f")
+        landscape.append("\t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333")
+        landscape.append("\t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333 \t \U0001F333")
+        landscape.append("\t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333")
+        landscape.append("\t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f")
+        landscape.append("\t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f")
+        
+
+        for x in range(len(animation)):
+
+            print(title)
+            print(landscape[x])
+            print(animation[x])
+            time.sleep(0.8)
+            self.clearTerminal()
+
