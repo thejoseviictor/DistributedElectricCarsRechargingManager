@@ -68,6 +68,7 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
                 result = response.json() # Convertendo a Resposta do Flask Para Dicionário.
                 client.publish(publisherTopic, str(result)) # Enviando a Resposta no MQTT como String.
                 print(f"Resposta Enviada Via MQTT: {result}\n")
+                receivedMessages.clear() # Limpando as Mensagens Recebidas.
             else:
                 try:
                     errorMessage = response.json().get("error") # Copiando a Mensagem de Erro do HTTP.
@@ -75,12 +76,14 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
                     errorMessage = "Erro Desconhecido"
                 client.publish(publisherTopic, str({"error": errorMessage}))
                 print(f"Erro na Solicitação HTTP ({response.status_code}): {errorMessage}\n")
+                receivedMessages.clear() # Limpando as Mensagens Recebidas.
         # Tratando as Exceções, Se o Servidor Não Responder:
         except Exception as e:
             response, status_code = handleHTTPExceptions(e)
             errorMessage = response.json().get("error")
             client.publish(publisherTopic, str({"error": errorMessage}))
             print(f"Exceção na Solicitação HTTP ({status_code}): {errorMessage}\n")
+            receivedMessages.clear() # Limpando as Mensagens Recebidas.
 
 # Função para Ler as Reservas de um Veículo, Recebida por um Tópico do MQTT:
 def mqttGetReservations(client, action: str, vehicleData: dict):
@@ -107,18 +110,19 @@ def onDisconnect(client, userdata, rc):
 
 # Função "callback" ao Receber uma Mensagem do MQTT:
 def onMessage(client, userdata, message): # Assinatura Padrão da Função.
-    # Verificando Se a Mensagem Já Foi Recebida Anteriormente, Se Não Ela Será Salva:
-    messageKey = f"{message.topic}:{message.payload}"
-    if messageKey in receivedMessages:
-        print(f"Ignorando uma Mensagem Duplicada: {message.payload.decode()}\n")
-        return # Saindo da Função.
-    else:
-        receivedMessages.add(messageKey) # Salvando a Mensagem.
-
     # Manipulando a Mensagem:
     decodedMessage = message.payload.decode() # Decodificando a Mensagem, Convertendo Bytes em String.
-    print(f"Mensagem MQTT Recebida: {decodedMessage}\n")
     jsonMessage = json.loads(decodedMessage) # Transformando a Mensagem em Dicionário.
+    normalizedPayload = json.dumps(jsonMessage, sort_keys=True) # Transformando o Dicionário em Strings Ordenadas.
+    messageKey = f"{message.topic}:{normalizedPayload}" # Chave da Mensagem Para Verificação de Duplicidade.
+
+    # Verificando Se a Mensagem Já Foi Recebida Anteriormente, Se Não Ela Será Salva:
+    if messageKey in receivedMessages:
+        print(f"Ignorando uma Mensagem Duplicada: {decodedMessage}\n")
+        return # Saindo da Função.
+    else:
+        print(f"Mensagem MQTT Recebida: {decodedMessage}\n")
+        receivedMessages.add(messageKey) # Salvando a Mensagem.
 
     # Salvando o Tópico e Separando a Ação:
     topic = message.topic.split("/") # Salvando as Partes do Tópico em uma Lista: ["from", "action", "to"]
