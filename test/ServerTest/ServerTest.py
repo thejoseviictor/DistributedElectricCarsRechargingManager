@@ -1,27 +1,11 @@
-# Testando as APIs dos Servidores:
+# Um Servidor, Para Testar as APIs dos Outros Servidores:
+
 import os
 import requests
 
-data_post = {
-    "vehicleID": 12, 
-    "actualBatteryPercentage": 30,
-    "batteryCapacity": 200
-}
-
-data_get = {
-    "vehicleID": 12
-}
-
-data_delete = {
-    "reservationID": 1, 
-    "chargingStationID": 1,
-    "chargingPointID": 1,
-    "vehicleID": 12
-}
-
-reservation_post = {
-    "vehicleID": 1,
-    "actualBatteryPercentage": 20,
+dataPost = {
+    "vehicleID": 25,
+    "actualBatteryPercentage": 50,
     "batteryCapacity": 51,
     "reservationsRoute": [
         {
@@ -39,7 +23,18 @@ reservation_post = {
     ]
 }
 
-# Recebendo os IP e Portas dos Servidores Providos pelas Variáveis de Ambiente:
+dataGet = {
+    "vehicleID": 25
+}
+
+dataDelete = {
+    "reservationID": 1, 
+    "chargingStationID": 1,
+    "chargingPointID": 1,
+    "vehicleID": 25
+}
+
+# Recebendo os IP e Portas dos Outros Servidores Providos pelas Variáveis de Ambiente:
 ECOCHARGE_SERVER_IP = os.environ.get('ECOCHARGE_SERVER_IP')
 ECOCHARGE_SERVER_PORT = os.environ.get('ECOCHARGE_SERVER_PORT')
 EFLUX_SERVER_IP = os.environ.get('EFLUX_SERVER_IP')
@@ -47,14 +42,11 @@ EFLUX_SERVER_PORT = os.environ.get('EFLUX_SERVER_PORT')
 VOLTPOINT_SERVER_IP = os.environ.get('VOLTPOINT_SERVER_IP')
 VOLTPOINT_SERVER_PORT = os.environ.get('VOLTPOINT_SERVER_PORT')
 
-response = requests.post(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=data_post)
+response = requests.post(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=dataPost)
 print(response.json())
 
-response = requests.get(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', params=data_get)
+response = requests.get(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', params=dataGet)
 print(response.json())
 
-response = requests.delete(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=data_delete)
-print(response.json())
-
-response = requests.post(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=reservation_post)
+response = requests.delete(f'http://{VOLTPOINT_SERVER_IP}:{VOLTPOINT_SERVER_PORT}/reservation', json=dataDelete)
 print(response.json())
