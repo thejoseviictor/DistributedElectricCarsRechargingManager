@@ -108,7 +108,7 @@ def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
 # Função "callback" ao Perder Conexão Com o Broker MQTT:
 def onDisconnect(client, userdata, rc):
     if rc != 0:
-        print("Conexão Com o Broker Perdida! Tentando Reconectar...\n")
+        print("Conexão Com o Broker Perdida!\n")
         client.loop_stop() # Finalizando o Loop da Conexão Anterior.
         connectToBroker(client)
         client.loop_start() # Iniciando o Loop de Recebimento das Mensagens.
