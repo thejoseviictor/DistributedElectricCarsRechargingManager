@@ -7,7 +7,7 @@ import threading # Para Criar Múltiplas Instâncias.
 from ReservationsFile import ReservationsFile # Que Manipula a Persistência de Dados das Reservas.
 from ChargingStationsFile import ChargingStationsFile # Que Manipula a Persistência de Dados dos Postos de Recarga.
 import ReservationHelper # Funções para Gerar Parâmetros para Reservas.
-from MQTT import startMQTT # Função para Configurar e Inicializar o MQTT.
+from mqttFunctions import startMQTT # Função para Configurar e Inicializar o MQTT.
 from Utils import sendReservationsToOtherServers # Função Para Enviar Solicitações de Reservas Para Outros Servidores.
 
 # Salvando o Nome da Empresa:
