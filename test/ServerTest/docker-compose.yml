@@ -7,11 +7,11 @@ services:
       dockerfile: Dockerfile
     container_name: recharging_manager_server_test
     environment:
-      - PYTHONUNBUFFERED=1 # Habilitando a Exibição dos Prints no Terminal.
-      - ECOCHARGE_SERVER_IP=192.168.0.1 # IP do End-Point do Servidor da Empresa "EcoCharge".
-      - ECOCHARGE_SERVER_PORT=64000 # Porta do End-Point do Servidor da Empresa "EcoCharge".
-      - EFLUX_SERVER_IP=192.168.0.1 # IP do End-Point do Servidor da Empresa "E-Flux".
-      - EFLUX_SERVER_PORT=64111 # Porta do End-Point do Servidor da Empresa "E-Flux".
-      - VOLTPOINT_SERVER_IP=192.168.0.1 # IP do End-Point do Servidor da Empresa "VoltPoint".
-      - VOLTPOINT_SERVER_PORT=64222 # Porta do End-Point do Servidor da Empresa "VoltPoint".
-    network_mode: host # A Rede do Servidor Será a Mesma da Máquina.
+      - PYTHONUNBUFFERED=1
+      - ECOCHARGE_SERVER_IP=192.168.0.1
+      - ECOCHARGE_SERVER_PORT=64000
+      - EFLUX_SERVER_IP=192.168.0.1
+      - EFLUX_SERVER_PORT=64111
+      - VOLTPOINT_SERVER_IP=192.168.0.1
+      - VOLTPOINT_SERVER_PORT=64222
+    network_mode: host
