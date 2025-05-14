@@ -7,7 +7,7 @@ import threading # Para Criar Múltiplas Instâncias.
 from ReservationsFile import ReservationsFile # Que Manipula a Persistência de Dados das Reservas.
 from ChargingStationsFile import ChargingStationsFile # Que Manipula a Persistência de Dados dos Postos de Recarga.
 import ReservationHelper # Funções para Gerar Parâmetros para Reservas.
-from mqttFunctions import startMQTT # Função para Configurar e Inicializar o MQTT.
+import mqttFunctions # Função para Configurar e Inicializar o MQTT.
 from Utils import sendReservationsToOtherServers # Função Para Enviar Solicitações de Reservas Para Outros Servidores.
 
 # Salvando o Nome da Empresa:
@@ -138,7 +138,7 @@ def deleteReservations():
 # Rodando o Servidor no IP da Máquina:
 if __name__ == '__main__':
     # Iniciando o MQTT em Outra Thread:
-    mqtt_thread = threading.Thread(target=startMQTT) # Configurando a Thread do MQTT.
+    mqtt_thread = threading.Thread(target=mqttFunctions.startMQTT) # Configurando a Thread do MQTT.
     mqtt_thread.daemon = True # Thread "Daemon" Que Se Encerrará Junto Com o Servidor.
     mqtt_thread.start() # Iniciando a Thread do MQTT.
 
