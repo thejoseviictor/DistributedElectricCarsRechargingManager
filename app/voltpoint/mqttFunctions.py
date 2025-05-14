@@ -66,6 +66,7 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
                 client.publish(publisherTopic, str(result)) # Enviando a Resposta no MQTT como String.
                 print("Resposta Enviada Via MQTT:\n")
                 print(json.dumps(result, indent=4)) # Mensagem Identada.
+                print("\n")
             else:
                 try:
                     errorMessage = response.json().get("error") # Copiando a Mensagem de Erro do HTTP.
@@ -107,9 +108,9 @@ def onDisconnect(client, userdata, rc):
 def onMessage(client, userdata, message): # Assinatura Padrão da Função.
     # Manipulando a Mensagem:
     decodedMessage = message.payload.decode() # Decodificando a Mensagem, Convertendo Bytes em String.
-    print("Mensagem MQTT Recebida:\n")
-    print(json.dumps(decodedMessage, indent=4)) # Mensagem Identada.
     jsonMessage = json.loads(decodedMessage) # Transformando a Mensagem em Dicionário.
+    print("Mensagem MQTT Recebida:\n")
+    print(json.dumps(jsonMessage, indent=4)) # Mensagem Identada.
 
     # Salvando o Tópico e Separando a Ação:
     topic = message.topic.split("/") # Salvando as Partes do Tópico em uma Lista: ["from", "action", "to"]
