@@ -10,8 +10,5 @@ COPY . .
 # Instalando as Dependências, Sem Usar Cache no "pip":
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expondo a Porta do Servidor:
-EXPOSE 5000
-
 # Executando a API do Servidor:
 CMD ["python", "ServerTest.py"]
