@@ -142,12 +142,17 @@ def onMessage(client, userdata, message): # Assinatura Padrão da Função.
     else:
         print(f"Ação Desconhecida no Tópico: {message.topic}\n")
 
+# Função "callback" ao Publicar uma Mensagem no MQTT:
+def onPublish(client, userdata, mid):
+    print("Mensagem Publicada Com Sucesso!\n")
+
 # Configurando e Iniciando o MQTT:
 def startMQTT():
     client = mqtt.Client() # Salvando o Cliente MQTT.
     client.on_connect = onConnect # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Conectar-se ao Broker.
     client.on_disconnect = onDisconnect # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Perder Conexão Com o Broker.
     client.on_message = onMessage # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Receber uma Mensagem.
+    client.on_publish = onPublish # Salvando a Função de "callback", Que Será Passada Como Parâmetro ao Publicar uma Mensagem.
     # Configurações de Conexão Com o Broker:
     client.reconnect_delay_set(min_delay=3,max_delay=30) # Tempo de Reconexão.
     client.connect_async(MQTT_BROKER_HOST, int(MQTT_BROKER_PORT), 60) # Conexão Assíncrona Com o Broker, Com "Keep Alive" (Avisos) de 60 Segundos.
