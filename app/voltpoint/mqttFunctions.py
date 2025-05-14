@@ -26,6 +26,9 @@ MQTT_TOPICS_PUBLISHER = {
     "server/delete_reservations/vehicle"
 }
 
+# Salvando as Mensagens Recebidas, Para Evitar Duplicação:
+receivedMessages = set()
+
 # Descobrindo em Qual Tópico Publicar no MQTT:
 def findPublisherTopic(action: str, destination: str):
     for topic in MQTT_TOPICS_PUBLISHER:
@@ -104,6 +107,14 @@ def onDisconnect(client, userdata, rc):
 
 # Função "callback" ao Receber uma Mensagem do MQTT:
 def onMessage(client, userdata, message): # Assinatura Padrão da Função.
+    # Verificando Se a Mensagem Já Foi Recebida Anteriormente, Se Não Ela Será Salva:
+    messageKey = f"{message.topic}:{message.payload}"
+    if messageKey in receivedMessages:
+        print(f"Ignorando uma Mensagem Duplicada: {message.payload.decode()}\n")
+        return # Saindo da Função.
+    else:
+        receivedMessages.add(messageKey) # Salvando a Mensagem.
+
     # Manipulando a Mensagem:
     decodedMessage = message.payload.decode() # Decodificando a Mensagem, Convertendo Bytes em String.
     print(f"Mensagem MQTT Recebida: {decodedMessage}\n")
