@@ -19,11 +19,11 @@ class Reservation:
         self.kWhPrice = kWhPrice    # Preço do kWh do Ponto de Carregamento.
         self.vehicleID = vehicleID  # ID do Veículo.
         self.duration = self.calculateDuration(actualBatteryPercentage, batteryCapacity) # Duração da Recarga em Horas.
+        self.timeToReach = timeToReach # Tempo Necessário, em Horas, Para o Veículo Alcançar Essa Reserva.
         self.startDateTime = self.calculateStartDateTime(lastReservationFinishDateTime) # Formato ISO: 0000-00-00T00:00:00 (Ano, Mês, Dia, T(Separador Entre Data e Hora), Hora, Minutos, Segundos)
         self.finishDateTime = self.calculateFinishDateTime() # Formato ISO: 0000-00-00T00:00:00 (Ano, Mês, Dia, T(Separador Entre Data e Hora), Hora, Minutos, Segundos)
         self.price = self.calculatePrice()  # Preço da Recarga.
         self.status = "agendada" # Status da Reserva: "agendada" ou "realizada".
-        self.timeToReach = timeToReach # Tempo Necessário, em Horas, Para o Veículo Alcançar Essa Reserva.
 
     # Calculando o Preço da Recarga:
     # kWh = Potência do Carregador (kW) * Tempo (Horas)
