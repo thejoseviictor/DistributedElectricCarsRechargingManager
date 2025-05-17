@@ -8,7 +8,7 @@ from ChargingPointsFile import ChargingPointsFile
 class Reservation:
     # Inicializando a Classe e seus Atributos:
     def __init__(self, reservationID: int, chargingStationID: int, chargingPointID: int, cityName: str, cityCodename: str, companyName: str, chargingPointPower: float,
-                 kWhPrice: float, vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, lastReservationFinishDateTime, timeToReach):
+                 kWhPrice: float, vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, lastReservationFinishDateTime, timeToReach: float):
         self.reservationID = reservationID    # ID da Reserva.
         self.chargingStationID = chargingStationID  # ID do Posto de Recarga.
         self.chargingPointID = chargingPointID  # ID do Ponto de Carregamento.
@@ -97,13 +97,13 @@ class ReservationsFile:
 
     # Encontrando a Data de Finalização da Última Reserva Cadastrada em um Ponto de Carregamento Específico:
     # Resumindo, Descobrir Quando o Último Veículo Vai Terminar de Usar o Ponto de Carregamento.
-    def getLastReservationFinishDateTime(self, chargingPointID: int):
+    def getLastReservationFinishDateTime(self, chargingStationID: int, chargingPointID: int):
         self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         found = False # Indicará Se um Data Posterior For Encontrada.
         lastDateTime = datetime.datetime(1999, 12, 31, 0, 0, 0) # Data de Base para Comparação Inicial.
         # Percorrendo a Lista de Reservas:
         for reservation in self.reservationsList:
-            if reservation["chargingPointID"] == chargingPointID:
+            if reservation["chargingStationID"] == chargingStationID and reservation["chargingPointID"] == chargingPointID :
                 dateTimeInFile = datetime.datetime.fromisoformat(reservation["finishDateTime"]) # Decodificando a Data na Lista para DateTime.
                 # Salvando, Se a Data na Lista For Posterior:
                 if lastDateTime < dateTimeInFile:
@@ -141,7 +141,7 @@ class ReservationsFile:
             # Gerando o ID da Nova Reserva:
             reservationID = self.generateReservationID(chargingPointID)
             # Descobrindo a Data de Finalização da Última Reserva:
-            lastReservationFinishDateTime = self.getLastReservationFinishDateTime(chargingPointID)
+            lastReservationFinishDateTime = self.getLastReservationFinishDateTime(chargingStationID, chargingPointID)
             # Se Não Houverem Reservas, a Nova Reserva Será do Horário Atual + 5 Minutos:
             if lastReservationFinishDateTime is None:
                 lastReservationFinishDateTime = datetime.datetime.now().isoformat()
