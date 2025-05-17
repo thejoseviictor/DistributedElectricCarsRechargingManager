@@ -52,7 +52,6 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
         # Formatando a Mensagem do Post para API:
         reservationsPost = {
             "vehicleID": vehicleID,
-            "actualBatteryPercentage": actualBatteryPercentage,
             "batteryCapacity": batteryCapacity,
             "reservationsRoute": reservationsRoute
         }
@@ -65,7 +64,7 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
                 result = response.json() # Convertendo a Resposta do Flask Para Dicionário.
                 client.publish(publisherTopic, str(result)) # Enviando a Resposta no MQTT como String.
                 print("Resposta Enviada Via MQTT:\n")
-                print(json.dumps(result, indent=4)) # Mensagem Identada.
+                print(json.dumps(result, indent=4, ensure_ascii=False)) # Mensagem Identada.
                 print("\n")
             else:
                 try:
@@ -80,14 +79,6 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
             errorMessage = response.json().get("error")
             client.publish(publisherTopic, str({"error": errorMessage}))
             print(f"Exceção na Solicitação HTTP ({status_code}): {errorMessage}\n")
-
-# Função para Ler as Reservas de um Veículo, Recebida por um Tópico do MQTT:
-def mqttGetReservations(client, action: str, vehicleData: dict):
-    pass
-
-# Função para Excluir as Reservas de um Veículo, Recebida por um Tópico do MQTT:
-def mqttDeleteReservations(client, action: str, vehicleData: dict):
-    pass
 
 # Função "callback" ao Conectar-se ao Broker MQTT:
 def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
@@ -128,22 +119,6 @@ def onMessage(client, userdata, message): # Assinatura Padrão da Função.
         else:
             missingKeys = [key for key in expectedKeys if key not in jsonMessage]
             print(f"O Agendamento das Reservas Foi Impedido, Pois Não Foram Enviadas as Seguintes Informações: {missingKeys}\n")
-    
-    # Tópico para Retornar as Reservas do Veículo:
-    elif topic_action == "get_reservations":
-        expectedKey = "vehicleID" # Chave Esperada na Mensagem.
-        if expectedKey in jsonMessage: # Verificando Se a Chave Está Presente.
-            mqttGetReservations(client, topic_action, jsonMessage) # Passando as Informações do Veículo Para a Função.
-        else:
-            print(f"Não Foi Possível Verificar as Reservas do Veículo, Pois a Seguinte Informação Não Foi Enviada: {expectedKey}\n")
-    
-    # Tópico para Excluir as Reservas do Veículo:
-    elif topic_action == "delete_reservations":
-        expectedKey = "vehicleID" # Chave Esperada na Mensagem.
-        if expectedKey in jsonMessage: # Verificando Se a Chave Está Presente.
-            mqttDeleteReservations(client, topic_action, jsonMessage) # Passando as Informações do Veículo Para a Função.
-        else:
-            print(f"Não Foi Possível Excluir as Reservas do Veículo, Pois a Seguinte Informação Não Foi Enviada: {expectedKey}\n")
     
     # Ação Desconhecida no Tópico:
     else:
