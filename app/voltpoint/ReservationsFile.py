@@ -8,7 +8,7 @@ from ChargingPointsFile import ChargingPointsFile
 class Reservation:
     # Inicializando a Classe e seus Atributos:
     def __init__(self, reservationID: int, chargingStationID: int, chargingPointID: int, cityName: str, cityCodename: str, companyName: str, chargingPointPower: float,
-                 kWhPrice: float, vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, lastReservationFinishDateTime):
+                 kWhPrice: float, vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, lastReservationFinishDateTime, timeToReach):
         self.reservationID = reservationID    # ID da Reserva.
         self.chargingStationID = chargingStationID  # ID do Posto de Recarga.
         self.chargingPointID = chargingPointID  # ID do Ponto de Carregamento.
@@ -22,6 +22,8 @@ class Reservation:
         self.startDateTime = self.calculateStartDateTime(lastReservationFinishDateTime) # Formato ISO: 0000-00-00T00:00:00 (Ano, Mês, Dia, T(Separador Entre Data e Hora), Hora, Minutos, Segundos)
         self.finishDateTime = self.calculateFinishDateTime() # Formato ISO: 0000-00-00T00:00:00 (Ano, Mês, Dia, T(Separador Entre Data e Hora), Hora, Minutos, Segundos)
         self.price = self.calculatePrice()  # Preço da Recarga.
+        self.status = "agendada" # Status da Reserva: "agendada" ou "realizada".
+        self.timeToReach = timeToReach # Tempo Necessário, em Horas, Para o Veículo Alcançar Essa Reserva.
 
     # Calculando o Preço da Recarga:
     # kWh = Potência do Carregador (kW) * Tempo (Horas)
@@ -39,7 +41,7 @@ class Reservation:
     # Novas Reservas São Feitas para 5 Minutos Após a Última Reserva Cadastrada no Ponto de Carregamento:
     def calculateStartDateTime(self, lastReservationFinishDateTime):
         lastReservationFinishDateTime = datetime.datetime.fromisoformat(lastReservationFinishDateTime) # Decodificando para o Formato DateTime.
-        resultedStartDateTime = lastReservationFinishDateTime + datetime.timedelta(minutes=5) # Somando "5" Minutos.
+        resultedStartDateTime = lastReservationFinishDateTime + datetime.timedelta(hours=self.timeToReach, minutes=5) # Somando o Tempo para Alcançar + Cinco Minutos.
         return resultedStartDateTime.isoformat() # Codificando Para o Formato ISO.
     
     # Calcula a Data Que o Veículo Irá Terminar de Usar o Ponto de Carregamento, de Acordo com a Duração da Recarga em Horas:
@@ -128,7 +130,7 @@ class ReservationsFile:
     
     # Criando uma Reserva e Salvando no Arquivo ".json":
     def createReservation(self, chargingStationID: int, chargingPointID: int, cityName: str, cityCodename: str, companyName: str,
-                          vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float):
+                          vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, timeToReach: float):
         self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         # Buscando Informações do Ponto de Carregamento Selecionado:
         cp = ChargingPointsFile() # cp = Charging Point.
@@ -145,7 +147,7 @@ class ReservationsFile:
                 lastReservationFinishDateTime = datetime.datetime.now().isoformat()
             # Gerando o Objeto da Reserva:
             reservationObj = Reservation(reservationID, chargingStationID, chargingPointID, cityName, cityCodename, companyName, chargingPointPower,
-                                         kWhPrice, vehicleID, actualBatteryPercentage, batteryCapacity, lastReservationFinishDateTime)
+                                         kWhPrice, vehicleID, actualBatteryPercentage, batteryCapacity, lastReservationFinishDateTime, timeToReach)
             # Salvando as Informações da Reserva na Lista:
             createdReservation = ({
                 "reservationID": reservationObj.reservationID, 
@@ -160,7 +162,8 @@ class ReservationsFile:
                 "startDateTime": reservationObj.startDateTime,
                 "finishDateTime": reservationObj.finishDateTime, 
                 "duration": reservationObj.duration, 
-                "price": reservationObj.price})
+                "price": reservationObj.price,
+                "status": reservationObj.status})
             self.reservationsList.append(createdReservation)
             self.saveReservations() # Salvando no Arquivo .json.
             print(f"Reserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
