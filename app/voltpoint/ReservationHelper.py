@@ -38,7 +38,7 @@ def chooseChargingStations(vehicleID: int, departureCityCodename: str, arrivalCi
             # Não Sabemos a Velocidade dos Veículos, Então Definimos a Distância Mínima Que Todos os Veículos Conseguem Percorrer em Uma Hora.
             minimumDistancePerHour = 50 # Distância Mínima = Velocidade Mínima em km/h.
 
-            previousReservationDistance = 0 # Para Salvar a Distância Percorrida Desde a Cidade da Última Reserva.
+            lastReservationKey = 0 # A Chave da Cidade Onde a Última Reserva Está Prevista.
 
             # Calculando Onde as Reservas Devem Ser Feitas:
             # Como Funciona:
@@ -48,12 +48,13 @@ def chooseChargingStations(vehicleID: int, departureCityCodename: str, arrivalCi
             # 3. Decremente a Autonomia Atual pela Distância Entre as Cidades, Para Descobrir Com Quanto de Autonomia Ele Chegará na Próxima Cidade.
             # 4. Refaça os Passos Anteriores, Até Chegar a Última Cidade da Rota.
             for city in range(routeCitiesCount-1):
-                previousReservationDistance += resultedRoute[city]["location"] # Somando a Posição Desta Cidade na Distância Percorrida Desde a Última Reserva.
                 distanceBetweenCities = resultedRoute[city+1]["location"] - resultedRoute[city]["location"] # Distância Entre a Cidade Atual e a Cidade Próxima.
                 if distanceBetweenCities > currentBatteryAutonomy: # Situação de Recarga.
+                    # Calculando a Distância Entre a Cidade da Última Reserva e a Cidade Atual:
+                    distanceFromLastReservationCity = resultedRoute[city]["location"] - resultedRoute[lastReservationKey]["location"]
                     # Calculando o Tempo Necessário, em Horas, para Alcançar Essa Cidade, de Acordo com a Posição da Cidade da Reserva Anterior.
-                    # Tempo para Alcançar = Distância Percorrida Desde a Última Reserva / Distância Mínima de Deslocamento por Hora.
-                    timeToReach = previousReservationDistance / minimumDistancePerHour 
+                    # Tempo para Alcançar = Distância da Cidade da Última Reserva / Distância Mínima de Deslocamento por Hora.
+                    timeToReach = distanceFromLastReservationCity / minimumDistancePerHour # Será Usado para Calcular a Data e Hora de Ínicio da Reserva.
                     actualBatteryPercentage = (currentBatteryAutonomy * 100) / totalBatteryAutonomy # Atualizando a Porcentagem de Bateria ao Chegar Nesta Cidade.
                     # Salvando as Informações de Tempo para Alcançar e Porcentagem de Bateria Atual:
                     resultedRoute[city]["timeToReach"] = timeToReach
@@ -61,7 +62,7 @@ def chooseChargingStations(vehicleID: int, departureCityCodename: str, arrivalCi
                     # Adicionando a Cidade Atual na Lista de Cidades Onde Reservar:
                     reservationsRoute.append(resultedRoute[city])
                     currentBatteryAutonomy = totalBatteryAutonomy # Resetando a Autonomia do Veículo, Pois Haverá uma Recarga Completa.
-                    previousReservationDistance = 0 # Resetando a Distância Percorrida Desde a Cidade da Última Reserva.
+                    lastReservationKey = city # Salvando a Posição Dessa Cidade, Como a Cidade da Última Reserva.
                 currentBatteryAutonomy -= distanceBetweenCities # Autonomia Que o Veículo Terá ao Chegar na Próxima Cidade.
             
             # Retornando a Lista Com as Cidades Onde Devem Ser Feitas Reservas:
