@@ -23,7 +23,6 @@ class Reservation:
         self.startDateTime = self.calculateStartDateTime(lastReservationFinishDateTime) # Formato ISO: 0000-00-00T00:00:00 (Ano, Mês, Dia, T(Separador Entre Data e Hora), Hora, Minutos, Segundos)
         self.finishDateTime = self.calculateFinishDateTime() # Formato ISO: 0000-00-00T00:00:00 (Ano, Mês, Dia, T(Separador Entre Data e Hora), Hora, Minutos, Segundos)
         self.price = self.calculatePrice()  # Preço da Recarga.
-        self.status = "agendada" # Status da Reserva: "agendada" ou "realizada".
 
     # Calculando o Preço da Recarga:
     # kWh = Potência do Carregador (kW) * Tempo (Horas)
@@ -162,8 +161,7 @@ class ReservationsFile:
                 "startDateTime": reservationObj.startDateTime,
                 "finishDateTime": reservationObj.finishDateTime, 
                 "duration": reservationObj.duration, 
-                "price": reservationObj.price,
-                "status": reservationObj.status})
+                "price": reservationObj.price})
             self.reservationsList.append(createdReservation)
             self.saveReservations() # Salvando no Arquivo .json.
             print(f"Reserva para Veículo com ID '{vehicleID}' Foi Criada com Sucesso!\n")
