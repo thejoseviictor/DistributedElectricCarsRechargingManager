@@ -30,9 +30,8 @@ app = Flask(__name__) # "__name__" se tornará "__main__" ao executar.
 @app.route('/reservation', methods=['POST'])
 def createReservations():
     # Tratando os Dados Recebidos:
-    data = request.json # Recebendo os Dados em um Dicionário: data = {vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, reservationsRoute: list}.
+    data = request.json # Recebendo os Dados em um Dicionário: data = {vehicleID: int, batteryCapacity: float, reservationsRoute: list}.
     vehicleID = data.get('vehicleID') # ID do Veículo.
-    actualBatteryPercentage = data.get('actualBatteryPercentage') # Porcentagem Atual de Bateria do Veículo.
     batteryCapacity = data.get('batteryCapacity') # Capacidade de Bateria do Veículo em kWh.
     reservationsRoute = data.get('reservationsRoute') # A Rota das Reservas.
 
@@ -115,26 +114,6 @@ def createReservations():
         else:
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
-
-# Rota para Ler as Reservas de um Veículo Específico (Servidor-Servidor):
-@app.route('/reservation', methods=['GET'])
-def readReservations():
-    vehicleID = request.args.get('vehicleID') # Salvando o ID Recebido com Parâmetro.
-    print(f"ID do Veículo Recebido: {vehicleID}\n")
-    foundedReservations = reservationsData.findReservations(int(vehicleID)) # Procurando pelas Reservas do Veículo.
-    return jsonify(foundedReservations), 200 # Retornando Sucesso (200).
-
-# Rota para Excluir uma Reserva de um Veículo Específico (Servidor-Servidor):
-@app.route('/reservation', methods=['DELETE'])
-def deleteReservations():
-    data = request.json # Recebendo os Dados em JSON.
-    reservationID = data.get('reservationID') # Salvando o ID da Reserva, Recebido pelo JSON.
-    chargingStationID = data.get('chargingStationID') # Salvando o ID do Posto de Recarga, Recebido pelo JSON.
-    chargingPointID = data.get('chargingPointID') # Salvando o ID do Ponto de Carregamento, Recebido pelo JSON.
-    vehicleID = data.get('vehicleID') # Salvando o ID do Veículo, Recebido pelo JSON.
-    print(f"\nDados Recebidos para Reserva: {data}\n")
-    deleteStatus = reservationsData.deleteReservation(reservationID, chargingStationID, chargingPointID, vehicleID)
-    return jsonify(deleteStatus), 200 # Retornando Sucesso (200).
 
 # Rodando o Servidor no IP da Máquina:
 if __name__ == '__main__':
