@@ -7,7 +7,7 @@ services:
   vehicle: # Nome do Client
 
     build:
-      context: ./app/Vehicle # Diretório do Dockerfile
+      context: . # Diretório do Dockerfile
       dockerfile: Dockerfile
     
     container_name: vehicle_client # Nome do container ao ser buildado
