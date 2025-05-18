@@ -30,9 +30,8 @@ app = Flask(__name__) # "__name__" se tornará "__main__" ao executar.
 @app.route('/reservation', methods=['POST'])
 def createReservations():
     # Tratando os Dados Recebidos:
-    data = request.json # Recebendo os Dados em um Dicionário: data = {vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, reservationsRoute: list}.
+    data = request.json # Recebendo os Dados em um Dicionário: data = {vehicleID: int, batteryCapacity: float, reservationsRoute: list}.
     vehicleID = data.get('vehicleID') # ID do Veículo.
-    actualBatteryPercentage = data.get('actualBatteryPercentage') # Porcentagem Atual de Bateria do Veículo.
     batteryCapacity = data.get('batteryCapacity') # Capacidade de Bateria do Veículo em kWh.
     reservationsRoute = data.get('reservationsRoute') # A Rota das Reservas.
 
@@ -77,6 +76,7 @@ def createReservations():
     
     # Realizando as Reservas Deste Servidor.
     # Procurando os Postos de Recarga Que Atuam nas Cidades Solicitadas:
+    lastReservationDuration = 0 # Um Incremento da Duração da Reserva Anterior no "Tempo para Alcançar" da Reserva Atual.
     for cs in chargingStationsData.chargingStationsList:
         for city in serverReservations:
             if cs["city_codename"] == city["codename"]:
@@ -87,14 +87,16 @@ def createReservations():
                     print("Erro: Não Existem Pontos de Carregamento Cadastrados Neste Servidor!\n")
                     return jsonify({"error": "Não Existem Pontos de Carregamento Cadastrados Neste Servidor!"}), 404  # Erro 404: Not Found - Recurso Não Encontrado.
                 else:
+                    city["timeToReach"] += lastReservationDuration # Somando a Duração da Reserva Anterior.
                     # Realizando uma Reserva na Cidade:
-                    currentReservation = reservationsData.createReservation(chargingStationID, chargingPointID, city["name"], city["codename"],
-                                                                            companyName, vehicleID, actualBatteryPercentage, batteryCapacity)
+                    currentReservation = reservationsData.createReservation(chargingStationID, chargingPointID, city["name"], city["codename"], companyName,
+                                                                            vehicleID, city["actualBatteryPercentage"], batteryCapacity, city["timeToReach"])
                     # Verificando Se a Reserva Foi Realizada:
                     if not currentReservation:
                         print(f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}'\n")
                         return jsonify({"error": f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}"}), 404 # Erro 404: Not Found
                     else:
+                        lastReservationDuration = currentReservation["duration"] # Salvando a Duração Desta Reserva.
                         bookedReservations.append(currentReservation) # Salvando a Reserva na Lista de Reservas Que Será Retornada.
     
     # Retornando as Reservas, Se Não Houveram Mais Reservas Para Outros Servidores:
@@ -115,26 +117,6 @@ def createReservations():
         else:
             bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
-
-# Rota para Ler as Reservas de um Veículo Específico (Servidor-Servidor):
-@app.route('/reservation', methods=['GET'])
-def readReservations():
-    vehicleID = request.args.get('vehicleID') # Salvando o ID Recebido com Parâmetro.
-    print(f"ID do Veículo Recebido: {vehicleID}\n")
-    foundedReservations = reservationsData.findReservations(int(vehicleID)) # Procurando pelas Reservas do Veículo.
-    return jsonify(foundedReservations), 200 # Retornando Sucesso (200).
-
-# Rota para Excluir uma Reserva de um Veículo Específico (Servidor-Servidor):
-@app.route('/reservation', methods=['DELETE'])
-def deleteReservations():
-    data = request.json # Recebendo os Dados em JSON.
-    reservationID = data.get('reservationID') # Salvando o ID da Reserva, Recebido pelo JSON.
-    chargingStationID = data.get('chargingStationID') # Salvando o ID do Posto de Recarga, Recebido pelo JSON.
-    chargingPointID = data.get('chargingPointID') # Salvando o ID do Ponto de Carregamento, Recebido pelo JSON.
-    vehicleID = data.get('vehicleID') # Salvando o ID do Veículo, Recebido pelo JSON.
-    print(f"\nDados Recebidos para Reserva: {data}\n")
-    deleteStatus = reservationsData.deleteReservation(reservationID, chargingStationID, chargingPointID, vehicleID)
-    return jsonify(deleteStatus), 200 # Retornando Sucesso (200).
 
 # Rodando o Servidor no IP da Máquina:
 if __name__ == '__main__':
