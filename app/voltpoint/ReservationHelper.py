@@ -53,8 +53,13 @@ def chooseChargingStations(vehicleID: int, departureCityCodename: str, arrivalCi
                     # Calculando a Distância Entre a Cidade da Última Reserva e a Cidade Atual:
                     distanceFromLastReservationCity = resultedRoute[city]["location"] - resultedRoute[lastReservationKey]["location"]
                     # Calculando o Tempo Necessário, em Horas, para Alcançar Essa Cidade, de Acordo com a Posição da Cidade da Reserva Anterior.
-                    # Tempo para Alcançar = Distância da Cidade da Última Reserva / Distância Mínima de Deslocamento por Hora.
-                    timeToReach = distanceFromLastReservationCity / minimumDistancePerHour # Será Usado para Calcular a Data e Hora de Ínicio da Reserva.
+                    # Tempo para Alcançar = (Distância da Cidade da Última Reserva / Distância Mínima de Deslocamento por Hora) + Tempo para Alcançar da Cidade da Última Reserva.
+                    try:
+                        # Será Usado para Calcular a Data e Hora de Ínicio da Reserva:
+                        # Deve Ser Somada a Duração da Reserva Anterior, Através do Arquivo "Server.py"
+                        timeToReach = (distanceFromLastReservationCity / minimumDistancePerHour) + resultedRoute[lastReservationKey]["timeToReach"]
+                    except KeyError: # Se For a Primeira Cidade para Reserva:
+                        timeToReach = distanceFromLastReservationCity / minimumDistancePerHour
                     actualBatteryPercentage = (currentBatteryAutonomy * 100) / totalBatteryAutonomy # Atualizando a Porcentagem de Bateria ao Chegar Nesta Cidade.
                     # Salvando as Informações de Tempo para Alcançar e Porcentagem de Bateria Atual:
                     resultedRoute[city]["timeToReach"] = timeToReach
@@ -62,7 +67,7 @@ def chooseChargingStations(vehicleID: int, departureCityCodename: str, arrivalCi
                     # Adicionando a Cidade Atual na Lista de Cidades Onde Reservar:
                     reservationsRoute.append(resultedRoute[city])
                     currentBatteryAutonomy = totalBatteryAutonomy # Resetando a Autonomia do Veículo, Pois Haverá uma Recarga Completa.
-                    lastReservationKey = city # Salvando a Posição Dessa Cidade, Como a Cidade da Última Reserva.
+                    lastReservationKey = city # Salvando a Posição da Chave Desta Cidade, Como a Cidade da Última Reserva.
                 currentBatteryAutonomy -= distanceBetweenCities # Autonomia Que o Veículo Terá ao Chegar na Próxima Cidade.
             
             # Retornando a Lista Com as Cidades Onde Devem Ser Feitas Reservas:
