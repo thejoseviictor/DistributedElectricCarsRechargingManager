@@ -66,24 +66,17 @@ class ReservationsFile:
             with open(self.json_file, "r", encoding="utf-8") as file:
                 self.reservationsList = json.load(file) # Salvando os Dados do Arquivo ".json" na Lista.
     
-    # Procurando as Reservas para um Veículo Específico:
-    def findReservations(self, vehicleID: int):
+    # Verificando Se o Veículo Tem Reserva em um Posto de Recarga Específico:
+    def findReservation(self, chargingStationID: int, vehicleID: int):
         self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
-        foundedReservations = []
-        # Percorrendo a Lista de Reservas:
         for reservation in self.reservationsList:
-            if reservation["vehicleID"] == vehicleID:
-                foundedReservations.append(reservation)
-        # Retornando as Reservas Encontradas:
-        if foundedReservations:
-            return foundedReservations
-        else:
-            print(f"Nenhuma Reserva Foi Encontrada Para o Veículo com ID '{vehicleID}'!\n")
-            return None
+            if reservation["chargingStationID"] == chargingStationID and reservation["vehicleID"] == vehicleID:
+                return reservation
+        print(f"Nenhuma Reserva Foi Encontrada Para o Veículo com ID '{vehicleID}' no Posto de Recarga '{chargingStationID}'!\n")
+        return None
 
     # Listando Todas as Reservas Cadastradas para os Pontos de Carregamento, em um Posto de Recarga Específico:
     def listReservations(self, chargingStationID: int):
-        self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
         searchList = [] # Onde Serão Salvas as Reservas Encontradas.
         for reservation in self.reservationsList:
             if reservation["chargingStationID"] == chargingStationID:
@@ -132,6 +125,10 @@ class ReservationsFile:
     def createReservation(self, chargingStationID: int, chargingPointID: int, cityName: str, cityCodename: str, companyName: str,
                           vehicleID: int, actualBatteryPercentage: int, batteryCapacity: float, timeToReach: float):
         self.readReservations() # Atualizando a Memória de Execução Com o Banco de Dados em "reservations.json".
+        # Verificando Se o Veículo Já Tem uma Reserva Neste Posto de Recarga:
+        oldReservation = self.findReservation(chargingStationID, vehicleID)
+        if oldReservation:
+            return oldReservation # Retornando a Reserva Existente.
         # Buscando Informações do Ponto de Carregamento Selecionado:
         cp = ChargingPointsFile() # cp = Charging Point.
         cp = cp.findChargingPoint(chargingPointID, chargingStationID) # Salvando a Celular Encontrada.
