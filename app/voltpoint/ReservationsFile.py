@@ -40,7 +40,8 @@ class Reservation:
     # Novas Reservas São Feitas para 5 Minutos Após a Última Reserva Cadastrada no Ponto de Carregamento:
     def calculateStartDateTime(self, lastReservationFinishDateTime):
         lastReservationFinishDateTime = datetime.datetime.fromisoformat(lastReservationFinishDateTime) # Decodificando para o Formato DateTime.
-        resultedStartDateTime = lastReservationFinishDateTime + datetime.timedelta(hours=self.timeToReach, minutes=5) # Somando o Tempo para Alcançar + Cinco Minutos.
+        resultedStartDateTime = lastReservationFinishDateTime + datetime.timedelta(hours=self.timeToReach) # Somando o Tempo para Alcançar.
+        resultedStartDateTime += datetime.timedelta(minutes=5) # Somando Cinco Minutos.
         return resultedStartDateTime.isoformat() # Codificando Para o Formato ISO.
     
     # Calcula a Data Que o Veículo Irá Terminar de Usar o Ponto de Carregamento, de Acordo com a Duração da Recarga em Horas:
@@ -115,13 +116,13 @@ class ReservationsFile:
             return None
     
     # Gerando um ID para Nova Reserva:
-    # Os IDs Não Podem Ser Iguais Para o Mesmo Ponto de Carregamento.
+    # Os IDs Não Podem Ser Iguais Para o Mesmo Posto de Recarga.
     # IDs Novos: Maior ID + 1.
-    def generateReservationID(self, chargingPointID: int):
+    def generateReservationID(self, chargingStationID: int):
         startID = 1 # Um ID Inicial Que Será Usado Como Comparador.
         for reservation in self.reservationsList:
             # Percorrendo Todas as Reservas do Ponto de Carregamento Selecionado:
-            if reservation["chargingPointID"] == chargingPointID:
+            if reservation["chargingStationID"] == chargingStationID:
                 # ID Maior ou Igual (Para o Primeiro ID das Reservas):
                 if reservation["reservationID"] >= startID:
                     startID = reservation["reservationID"] + 1
@@ -138,7 +139,7 @@ class ReservationsFile:
             chargingPointPower = cp["power"]
             kWhPrice = cp["kWhPrice"]
             # Gerando o ID da Nova Reserva:
-            reservationID = self.generateReservationID(chargingPointID)
+            reservationID = self.generateReservationID(chargingStationID)
             # Descobrindo a Data de Finalização da Última Reserva:
             lastReservationFinishDateTime = self.getLastReservationFinishDateTime(chargingStationID, chargingPointID)
             # Se Não Houverem Reservas, a Nova Reserva Será do Horário Atual + 5 Minutos:
