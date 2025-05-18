@@ -15,7 +15,4 @@ services:
     stdin_open: true # Corresponde ao -i = modo interativo
     tty: true # Corrspond ao -t = terminal virtual
 
-    # depends_on: # Depende do host "cloud"
-    #  - cloud
-
     network_mode: host
