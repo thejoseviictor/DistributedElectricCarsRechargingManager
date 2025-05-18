@@ -76,6 +76,7 @@ def createReservations():
     
     # Realizando as Reservas Deste Servidor.
     # Procurando os Postos de Recarga Que Atuam nas Cidades Solicitadas:
+    lastReservationDuration = 0 # Um Incremento da Duração da Reserva Anterior no "Tempo para Alcançar" da Reserva Atual.
     for cs in chargingStationsData.chargingStationsList:
         for city in serverReservations:
             if cs["city_codename"] == city["codename"]:
@@ -86,6 +87,7 @@ def createReservations():
                     print("Erro: Não Existem Pontos de Carregamento Cadastrados Neste Servidor!\n")
                     return jsonify({"error": "Não Existem Pontos de Carregamento Cadastrados Neste Servidor!"}), 404  # Erro 404: Not Found - Recurso Não Encontrado.
                 else:
+                    city["timeToReach"] += lastReservationDuration # Somando a Duração da Reserva Anterior.
                     # Realizando uma Reserva na Cidade:
                     currentReservation = reservationsData.createReservation(chargingStationID, chargingPointID, city["name"], city["codename"], companyName,
                                                                             vehicleID, city["actualBatteryPercentage"], batteryCapacity, city["timeToReach"])
@@ -94,6 +96,7 @@ def createReservations():
                         print(f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}'\n")
                         return jsonify({"error": f"Não Foi Possível Realizar a Reserva em '{city["name"]}' Para o Veículo '{vehicleID}"}), 404 # Erro 404: Not Found
                     else:
+                        lastReservationDuration = currentReservation["duration"] # Salvando a Duração Desta Reserva.
                         bookedReservations.append(currentReservation) # Salvando a Reserva na Lista de Reservas Que Será Retornada.
     
     # Retornando as Reservas, Se Não Houveram Mais Reservas Para Outros Servidores:
