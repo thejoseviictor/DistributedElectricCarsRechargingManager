@@ -5,10 +5,16 @@ import os # Para Usar Variáveis de Ambiente.
 import json # Para Printar os Erros.
 import requests # Para Comunicação com Outros Servidores.
 import paho.mqtt.client as mqtt # Funções do MQTT.
-import time # Para o Loop de Tentativa de Conexão Com o Broker.
+import threading
 from Server import SERVER_IP, SERVER_PORT # IP e Porta do Servidor.
 from Utils import handleHTTPExceptions # Exceções Para Problemas de Conexão.
 import ReservationHelper # Funções para Gerar Parâmetros para Reservas.
+
+# Criando um Bloqueio (Mutex), Que Não Pertence a Thread Que o Bloquear:
+# É um Recurso de Software do Python;
+# Impede o Acesso a Recursos Compartilhados, Quando uma Thread os Estiver Utilizando;
+# Tem Dois Estados: locked (bloqueado) e unlocked (desbloqueado).
+lock = threading.Lock()
 
 # Salvando as Informações do MQTT:
 MQTT_BROKER_HOST = os.environ.get('MQTT_BROKER_HOST') # Variável de Ambiente do Docker Compose.
@@ -37,48 +43,49 @@ def findPublisherTopic(action: str, destination: str):
 
 # Função para Criar Reservas, Recebida por um Tópico do MQTT:
 def mqttCreateReservations(client, action: str, vehicleData: dict):
-    publisherTopic = findPublisherTopic(action, "vehicle") # Descobrindo em Qual Tópico Publicar.
-    if publisherTopic:
-        # Separando as Informações do Parâmetro em Variáveis:
-        vehicleID = vehicleData["vehicleID"] # ID do Veículo.
-        actualBatteryPercentage = vehicleData["actualBatteryPercentage"] # Porcentagem Atual de Bateria do Veículo.
-        batteryCapacity = vehicleData["batteryCapacity"] # Capacidade de Bateria do Veículo em kWh.
-        departureCityCodename = vehicleData["departureCityCodename"] # Apelido da Cidade de Partida.
-        arrivalCityCodename = vehicleData["arrivalCityCodename"] # Apelido da Cidade de Destino.
+    with lock: # Pede e Libera o Acesso aos Recursos Compartilhados Automaticamente.
+        publisherTopic = findPublisherTopic(action, "vehicle") # Descobrindo em Qual Tópico Publicar.
+        if publisherTopic:
+            # Separando as Informações do Parâmetro em Variáveis:
+            vehicleID = vehicleData["vehicleID"] # ID do Veículo.
+            actualBatteryPercentage = vehicleData["actualBatteryPercentage"] # Porcentagem Atual de Bateria do Veículo.
+            batteryCapacity = vehicleData["batteryCapacity"] # Capacidade de Bateria do Veículo em kWh.
+            departureCityCodename = vehicleData["departureCityCodename"] # Apelido da Cidade de Partida.
+            arrivalCityCodename = vehicleData["arrivalCityCodename"] # Apelido da Cidade de Destino.
 
-        # Descobrindo a Rota da Cidade de Partida para a Cidade de Destino:
-        reservationsRoute = ReservationHelper.chooseChargingStations(vehicleID, departureCityCodename, arrivalCityCodename, actualBatteryPercentage, batteryCapacity)
+            # Descobrindo a Rota da Cidade de Partida para a Cidade de Destino:
+            reservationsRoute = ReservationHelper.chooseChargingStations(vehicleID, departureCityCodename, arrivalCityCodename, actualBatteryPercentage, batteryCapacity)
 
-        # Formatando a Mensagem do Post para API:
-        reservationsPost = {
-            "vehicleID": vehicleID,
-            "batteryCapacity": batteryCapacity,
-            "reservationsRoute": reservationsRoute
-        }
+            # Formatando a Mensagem do Post para API:
+            reservationsPost = {
+                "vehicleID": vehicleID,
+                "batteryCapacity": batteryCapacity,
+                "reservationsRoute": reservationsRoute
+            }
 
-        # Solicitando a Reserva Através da API Local do Servidor via HTTP:
-        try:
-            response = requests.post(f'http://{SERVER_IP}:{SERVER_PORT}/reservation', json=reservationsPost, timeout=5)
-            # Verificando a Resposta da API:
-            if response.ok: # Atalho Para os Status de Sucesso, de 200 até 300.
-                result = response.json() # Convertendo a Resposta do Flask Para Dicionário.
-                client.publish(publisherTopic, str(result)) # Enviando a Resposta no MQTT como String.
-                print("Resposta Enviada Via MQTT:\n")
-                print(json.dumps(result, indent=4, ensure_ascii=False)) # Mensagem Identada.
-                print("\n")
-            else:
-                try:
-                    errorMessage = response.json().get("error") # Copiando a Mensagem de Erro do HTTP.
-                except ValueError:
-                    errorMessage = "Erro Desconhecido"
+            # Solicitando a Reserva Através da API Local do Servidor via HTTP:
+            try:
+                response = requests.post(f'http://{SERVER_IP}:{SERVER_PORT}/reservation', json=reservationsPost, timeout=5)
+                # Verificando a Resposta da API:
+                if response.ok: # Atalho Para os Status de Sucesso, de 200 até 300.
+                    result = response.json() # Convertendo a Resposta do Flask Para Dicionário.
+                    client.publish(publisherTopic, str(result)) # Enviando a Resposta no MQTT como String.
+                    print("Resposta Enviada Via MQTT:\n")
+                    print(json.dumps(result, indent=4, ensure_ascii=False)) # Mensagem Identada.
+                    print("\n")
+                else:
+                    try:
+                        errorMessage = response.json().get("error") # Copiando a Mensagem de Erro do HTTP.
+                    except ValueError:
+                        errorMessage = "Erro Desconhecido"
+                    client.publish(publisherTopic, str({"error": errorMessage}))
+                    print(f"Erro na Solicitação HTTP ({response.status_code}): {errorMessage}\n")
+            # Tratando as Exceções, Se o Servidor Não Responder:
+            except Exception as e:
+                response, status_code = handleHTTPExceptions(e)
+                errorMessage = response.json().get("error")
                 client.publish(publisherTopic, str({"error": errorMessage}))
-                print(f"Erro na Solicitação HTTP ({response.status_code}): {errorMessage}\n")
-        # Tratando as Exceções, Se o Servidor Não Responder:
-        except Exception as e:
-            response, status_code = handleHTTPExceptions(e)
-            errorMessage = response.json().get("error")
-            client.publish(publisherTopic, str({"error": errorMessage}))
-            print(f"Exceção na Solicitação HTTP ({status_code}): {errorMessage}\n")
+                print(f"Exceção na Solicitação HTTP ({status_code}): {errorMessage}\n")
 
 # Função "callback" ao Conectar-se ao Broker MQTT:
 def onConnect(client, userdata, flags, rc): # Assinatura Padrão da Função.
