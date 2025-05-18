@@ -109,16 +109,14 @@ class ReservationsFile:
             return None
     
     # Gerando um ID para Nova Reserva:
-    # Os IDs Não Podem Ser Iguais Para o Mesmo Posto de Recarga.
+    # Os IDs Não Podem Ser Iguais Para o Mesmo Servidor.
     # IDs Novos: Maior ID + 1.
-    def generateReservationID(self, chargingStationID: int):
+    def generateReservationID(self):
         startID = 1 # Um ID Inicial Que Será Usado Como Comparador.
         for reservation in self.reservationsList:
-            # Percorrendo Todas as Reservas do Ponto de Carregamento Selecionado:
-            if reservation["chargingStationID"] == chargingStationID:
-                # ID Maior ou Igual (Para o Primeiro ID das Reservas):
-                if reservation["reservationID"] >= startID:
-                    startID = reservation["reservationID"] + 1
+            # ID Maior ou Igual (Para o Primeiro ID das Reservas):
+            if reservation["reservationID"] >= startID:
+                startID = reservation["reservationID"] + 1
         return startID
     
     # Criando uma Reserva e Salvando no Arquivo ".json":
@@ -136,7 +134,7 @@ class ReservationsFile:
             chargingPointPower = cp["power"]
             kWhPrice = cp["kWhPrice"]
             # Gerando o ID da Nova Reserva:
-            reservationID = self.generateReservationID(chargingStationID)
+            reservationID = self.generateReservationID()
             # Descobrindo a Data de Finalização da Última Reserva:
             lastReservationFinishDateTime = self.getLastReservationFinishDateTime(chargingStationID, chargingPointID)
             # Se Não Houverem Reservas, a Nova Reserva Será do Horário Atual + 5 Minutos:
