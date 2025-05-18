@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+
 from User import User
 from VehicleUtility import VehicleUtility
 
+import random
 import json
 import time
 
@@ -16,14 +18,23 @@ class Vehicle:
     moneyCredit: float
 
     currentEnergy: int
-    criticalEnergy: int
-    distanceFromDestination: int
-    distanceFromChargingStation: int
     maximumBattery : int
 
     reservations = [] # Guarda as reservas
 
-    def showReservation(self):
+    utility = VehicleUtility()
+
+    def showInformations(self):
+         print(f"\n\t Nome completo: {self.owner.name} ")
+         print(f"\n\t CPF: {self.owner.cpf}")
+         print(f"\n\t Email: {self.owner.email}")
+         print(f"\n\t Senha: {self.owner.password}")
+         print(f"\n\t ID do veículo: {self.vid}")
+         print(f"\n\t Placa: {self.licensePlate}")
+         print(f"\n\t Crédito saldo : {self.moneyCredit}")
+         
+
+    def showReservations(self):
 
         if self.reservations :
 
@@ -48,7 +59,7 @@ class Vehicle:
 
             print("Não há reservas no momento !")
             time.sleep(3)
-
+   
 
     def savingLoginData(self, dataFilePath: str):
 
@@ -62,7 +73,6 @@ class Vehicle:
                 "licensePlate" : self.licensePlate ,
                 "moneyCredit" : self.moneyCredit ,
                 "currentEnergy" : self.currentEnergy ,
-                "criticalEnergy" : self.criticalEnergy ,
                 "maximumBattery" : self.maximumBattery
 
             }
@@ -71,14 +81,19 @@ class Vehicle:
             with open(dataFilePath, 'w') as f:
                 json.dump(data, f, indent=4)
 
-    def updateCredit(self, dataFilePath: str,  cost: float):
+    def updateCredit(self, dataFilePath: str, value: float, operation: str):
 
-        credit: float
         credit = self.moneyCredit
 
-        credit -= cost
+        if operation == "-":
 
-        self.moneyCredit = credit
+            credit -= value
+            self.moneyCredit = credit
+        
+        else:
+            credit += value
+            self.moneyCredit = credit
+
 
         with open(dataFilePath, 'r') as f:
             data = json.load(f)
@@ -87,6 +102,10 @@ class Vehicle:
 
         with open(dataFilePath, 'w') as f:
             json.dump(data, f, indent=4)
+
+        print(f"Saldo atual: R${self.moneyCredit:.2f}")
+        time.sleep(3)
+        self.utility.clearTerminal()
 
     def loadingData(self, dataFilePath: str, reservationsFilePath: str):
 
@@ -101,7 +120,6 @@ class Vehicle:
             self.licensePlate = str(data["licensePlate"]) 
             self.moneyCredit = float(data["moneyCredit"])
             self.currentEnergy = int(data["currentEnergy"])
-            self.criticalEnergy = int(data["criticalEnergy"])
             self.maximumBattery = int(data["maximumBattery"])
             
             with open(reservationsFilePath, 'r') as f:

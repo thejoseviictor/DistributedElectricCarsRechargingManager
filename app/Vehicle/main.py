@@ -26,8 +26,6 @@ import re  # Biblioteca que permite buscas, substituições e manipulação em s
 import sys # Bibliotecas usadas para trabalhar com caminhos, fluxo entre diretórios e entradas 
 import os  # e saidas diretamente com o sistema/terminal
 from pathlib import Path
-
-import turtle
 import json # Biblioteca usada para trabalhar com arquivos .json e importar dados fictícios para o sistema
 
 
@@ -52,7 +50,6 @@ DATA_PATH = BASE_DIR / 'dataPath' # Caminho da pasta "dataPath"
 #Definindo o caminho de cada arquivo de dados
 dataFilePath = DATA_PATH / 'data.json'
 reservationsFilePath = DATA_PATH / 'reservations.json'
-brokersFilePath = DATA_PATH / 'brokers.json'
 
 # Métodos utilitários --------------------------------------------------------------------------
 
@@ -66,18 +63,18 @@ utility = VehicleUtility()
 # Início do sistema
 
 repeat = True # Variavel usada para lidar com o fluxo de repetição do programa
-firstLogin = True # Variavel para indicar que apenas um login é preciso.
+firstLogin = True # Variavel para indicar que apenas um login é preciso por execução.
+
+utility.clearTerminal()
+
+utility.startAnimation() # Função para gerar uma pequena animação na primeira execução do programa
+    
+print(" Bem vindo(a)! \n")
+time.sleep(2)
 
 while(repeat):
 
-    utility.clearTerminal()
-
-    utility.startAnimation() # Função para gerar uma pequena animação de inicio do programa
-    
-    print(" Bem vindo(a)! \n")
-    time.sleep(2)
-
-    wrongOption = True # Variavel para determinar se o 
+    wrongOption = True # Variavel para lidar com opções incorretas inseridas no cenário login/registrar-se
 
     while wrongOption:
 
@@ -90,7 +87,7 @@ while(repeat):
             
             #Criando template das 2 classes, para serem preenchidas com os dados 
             ownerTemplate = User(cpf="", name="", email="", password="")
-            vehicle = Vehicle( vid= "", owner=ownerTemplate, licensePlate="", moneyCredit=0.0, currentEnergy=0, criticalEnergy=0, distanceFromDestination=0, distanceFromChargingStation=0, maximumBattery=0)
+            vehicle = Vehicle( vid= "", owner= ownerTemplate, licensePlate= "", moneyCredit= 0.0, currentEnergy= 0, maximumBattery=0)
             
             vehicle.loadingData(dataFilePath, reservationsFilePath)
 
@@ -99,7 +96,7 @@ while(repeat):
 
                 '''
                 Os dados são carregados de data.json, a partir da ultima geração de dados ficticios
-                obs: O arquivo "data.json" tem os dados salvos
+                obs: O arquivo "data.json" tem os dados salvos caso seja ppreciso conferir os dados para login
                 '''
                 #------------------------------------------------------------------------------------
                 
@@ -113,7 +110,7 @@ while(repeat):
                     password = input("\n SENHA: ")
                     utility.clearTerminal()
 
-
+                    # Conferindo se os dados de login estão corretos
                     if (login == vehicle.owner.cpf or login == vehicle.owner.email) and password == vehicle.owner.password:
                         print (" Login realizado com sucesso ! ")
                         time.sleep(3)
@@ -139,17 +136,23 @@ while(repeat):
 
             cpf = re.sub(r'\D', '', fake.cpf())
             
+            fakeName = []
+            fakeName.append(fake.first_name())
+            fakeName.append(fake.last_name())
 
-            genericFirstName = fake.first_name()
-            genericLastName = fake.last_name()
-            name = genericFirstName + " " + genericLastName
-            
+            # Processo de normalização do nome gerado por faker, evitando assim formatações indesejadas de str por conta de acentos e cê-cedilha 
+            genericName = utility.nomalizeName(fakeName)
+
+            firstName = genericName[0]
+            lastName = genericName[1]
+
+            name = firstName + " " + lastName
 
             # Lista e variavel para determinar um domínio aleatório para o email
             genericDomain = ["@gmail.com", "@outlook.com", "@hotmail.com", "@yahoo.com", "@bol.com"]
             randomDomain = random.randint(0,4)
 
-            email = re.sub(r"\s+", "", genericFirstName.lower() + "." + genericLastName.lower() + genericDomain[randomDomain])
+            email = re.sub(r"\s+", "", firstName.lower() + "." + lastName.lower() + genericDomain[randomDomain])
 
             # Senha aleatória 
             password = fake.password(length=8, special_chars=True, digits=True, upper_case=True, lower_case=True)
@@ -163,15 +166,14 @@ while(repeat):
             genericID = random.randint(1,99999) # Gera um ID aleatório de 5 dígitos para o veículo
             vid = str(genericID).zfill(5)
 
-            owner = user
+            owner = user 
             licensePlate = fake.license_plate()
-            moneyCredit = round(10000, 2) # O valor de crédito do veiculo inicia com R410.000
+            moneyCredit = round(10000, 2) # O valor de crédito do veiculo inicia com R$10.000
             currentEnergy = 100
-            criticalEnergy = 20 # Foi definido que a energia critica do veículo é 20%
 
             maximumBattery = random.randint(30,50) # A capacidade máxima da bateria é gerada aleatoriamente entre o valor de 30 a 50 (kWh) 
 
-            vehicle = Vehicle(vid = vid, owner = owner, licensePlate = licensePlate, moneyCredit = moneyCredit, currentEnergy = currentEnergy, criticalEnergy = criticalEnergy, distanceFromDestination = 0, distanceFromChargingStation = 0, maximumBattery = maximumBattery)
+            vehicle = Vehicle(vid = vid, owner = owner, licensePlate = licensePlate, moneyCredit = moneyCredit, currentEnergy = currentEnergy, maximumBattery = maximumBattery)
 
             # ---------------------------------------------------------------------------------------------
 
@@ -193,93 +195,90 @@ while(repeat):
             print("Digite uma opção válida !")
             wrongOption = True
 
-    print(" O que deseja fazer? \n")
-    reply = input(" Digite: \n\t 1. Fazer reserva \n\t 2. Ver histórico de reservas \n\t 3. Voltar para o inicio \n\t 4. Sair do programa \n\t -> ")
-    utility.clearTerminal()
+    wrongActions = True # Variavel de controle de opções de login
 
-    '''
-    Apresenta 3 opções de execução do programa:
-    
-    1. A opção 1 é para realizar a reserva, onde a origem e o destino da viagem é determinado e passado para o servidor via comunicação MQTT
+    while wrongActions :
 
-    2. A opção 2 é usada para ver a(s) reserva(s) do veículo já realizadas
-    
-    obs: Dentro da opção 2, após ver a reserva, há a opção de voltar para o início o encerrar o programa definitivamente
+        print(" O que deseja fazer? \n")
+        reply = input(" Digite: \n\t 1. Fazer reserva \n\t 2. Ver histórico de reservas \n\t 3. Ver informações de conta/veículo \n\t 4. Adicionar crédito \n\t 5. Voltar para o início \n\t 6. Sair do programa \n\t -> ")
+        utility.clearTerminal()
 
-    3. A opção 3 é para encerrar o sistema completamente. 
+        '''
+        Apresenta 6 opções de execução do programa:
+        
+        1. A opção 1 é para realizar a reserva, onde a origem e o destino da viagem é determinado e passado para o servidor via comunicação MQTT
+        2. A opção 2 é usada para ver a(s) reserva(s) do veículo já realizadas
+        3. A opção 3 é para ver as informações de conta
+        4. A opção 4 é para adicionar credito na conta
+        5. A opção 5 permite voltar para o início do programa
+        6. Interrompe totalmente o programa
 
-    '''
+        obs: Nas opções 1, 2, 3 e 4, o usuário pode decidir voltar pras opções de login ou encerrar o programa
 
-    if reply == "1" :
+        '''
 
-        wrongCities = True
+        if reply == "1" : # Opção 1: Realizar reserva
 
-        while wrongCities:
+            wrongCities = True
 
-            utility.clearTerminal()
+            while wrongCities:
 
-            print("\t Digite o local de origem: \n")
-            origin = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
-            
-            utility.clearTerminal()
-
-            print("\t Digite o local de destino: \n")
-            destination = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
-            
-            utility.clearTerminal()
-
-            route = utility.defineRoute(origin, destination)
-
-            if route == False:
-                print("\t Digite dados validos ! ")
-
-                time.sleep(3)
                 utility.clearTerminal()
 
-                wrongCities = True
+                print("\t Digite o local de origem: \n")
+                origin = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
+                
+                utility.clearTerminal()
 
-            else:
-                wrongCities = False
+                print("\t Digite o local de destino: \n")
+                destination = input("\t 1 - Vitória da Conquista \n \t 2 - Jequié \n \t 3 - Feira de Santana \n \t 4 - Euclides da Cunha \n \t 5 - Ibó \n \t 6 - Barro \n \t 7 - Jaguaribe \n \t 8 - Russas \n \t 9 - Fortaleza  \n \t  ->")
+                
+                utility.clearTerminal()
 
-        vClient = VehicleClient()
-        vClient.connectMQTT()
-        vClient.sendRequest(vehicle, route)
-        realized = vClient.waitInformation(vehicle)
+                route = utility.defineRoute(origin, destination)
 
-        if realized == True:
-            print("Reserva realizada !")
+                if route == False:
+                    print("\t Digite dados validos ! ")
+
+                    time.sleep(3)
+                    utility.clearTerminal()
+                    wrongCities = True
+
+                else:
+                    wrongCities = False
+                    vClient = VehicleClient(cost= 0.0)
+                    vClient.sendRequest(dataFilePath, vehicle, route)
+
+            
+        elif reply == "2" : # Opção 2: Ver reservas
+
+            vehicle.showReservations()
+            utility.writeReplyBack(wrongActions, repeat)
+        
+        elif reply == "3": # Opção 3: Mostrar informações de conta
+            
+            vehicle.showInformations()
+            utility.writeReplyBack(wrongActions, repeat)
+
+        elif reply == "4": # Opção 4: Adicionar crédito na conta
+
+            money = input("Qual valor (R$) deseja adicionar ao saldo da conta ? \n ->")
+            value = float(money.replace(",","."))
+
+            vehicle.updateCredit(dataFilePath, value, "+")
+            utility.writeReplyBack(wrongActions, repeat)
+
+        elif reply == "5": # Opção 5: Voltar para o início do programa
+            wrongActions = False
             repeat = True
 
-        else:
-            print("Reserva não realizada!")
-            repeat = True
-            time.sleep(3)
-
-    
-    elif reply == "2" :
-
-        vehicle.showReservation()
-
-        reply = input("\n O que deseja agora: \n 1. Voltar para o início. \n 2. Fechar programa. \n ->")
-
-        if reply == "1" :
-            repeat = True
-            utility.clearTerminal()
-
-        else:
+        elif reply == "6": # Opção 6: Sair do pragrama
+            wrongActions = False
             repeat = False
             utility.endAnimation()
 
-    elif reply == "3":
-        repeat = True
-
-    elif reply == "4":
-        repeat = False
-        utility.endAnimation()
-
-    else:
-        utility.clearTerminal()
-        print("Digite uma opção válida !")
-        time.sleep(3)
-        
-        
+        else:
+            utility.clearTerminal()
+            print("Digite uma opção válida !")
+            time.sleep(2)
+            wrongActions = True       

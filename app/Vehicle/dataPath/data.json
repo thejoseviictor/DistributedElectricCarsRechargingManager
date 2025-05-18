@@ -1,12 +1,11 @@
 {
-    "cpf": "57624803135",
-    "name": "Danilo da Costa",
-    "email": "danilo.dacosta@yahoo.com",
-    "password": "@1n)pNac",
-    "vid": "63407",
-    "licensePlate": "QPW-7G66",
-    "moneyCredit": 10000,
+    "cpf": "67219403887",
+    "name": "Theo Cunha",
+    "email": "theo.cunha@outlook.com",
+    "password": "!Xa@3Zld",
+    "vid": "25429",
+    "licensePlate": "DXY-8Q93",
+    "moneyCredit": 25100.0,
     "currentEnergy": 100,
-    "criticalEnergy": 20,
-    "maximumBattery": 41
+    "maximumBattery": 43
 }

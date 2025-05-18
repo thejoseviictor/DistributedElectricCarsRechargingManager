@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 import time
 import os
+import unicodedata # Biblioteca usada para tratar acentuações e caracteres
+
 @dataclass
 class VehicleUtility:
 
@@ -71,6 +73,36 @@ class VehicleUtility:
             return False
 
         return route
+    
+    def writeReplyBack(self, wrongActions: bool, repeat: bool):
+
+        reply = input("\n O que deseja agora: \n 1. Voltar para o início. \n 2. Fechar programa. \n ->")
+
+        if reply == "1" :
+            wrongActions = False
+            repeat = True
+            self.clearTerminal()
+
+        else:
+            wrongActions = False
+            repeat = False
+            self.endAnimation()
+
+    def nomalizeName(self, fakeName: list[str]):
+
+        genericName = []
+
+        for n in fakeName:
+
+            #Normalizando o primeiro nome e depois o sobrenome
+            unormalizatedName = unicodedata.normalize('NFD', n) # Separação de caractere e acentuação
+            normalizatedName = ''.join(c for c in unormalizatedName if not unicodedata.combining(c)) # Remoção das acentuações
+            NameWithoutCedilhado = normalizatedName.replace('ç', 'c').replace('Ç', 'C') # Substituição dos caracteres "ç" e "Ç" por "c" e "C", respectivamente
+            name = NameWithoutCedilhado.encode('ASCII', 'ignore').decode('ASCII')
+
+            genericName.append(name)
+
+        return genericName
     
     def startAnimation(self):
 
