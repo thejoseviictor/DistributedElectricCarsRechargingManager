@@ -189,11 +189,15 @@ while(repeat):
 
             # ---------------------------------------------------------------------------------------------
             
-            wrongOption = False
+            wrongOption = True
             
         else :
-            print("Digite uma opção válida !")
             wrongOption = True
+            print("Digite uma opção válida !")
+            time.sleep(2)
+            utility.clearTerminal()
+
+            
 
     wrongActions = True # Variavel de controle de opções de login
 

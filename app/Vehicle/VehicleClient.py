@@ -47,12 +47,12 @@ class VehicleClient:
 
                 client = mqtt.Client()
                 client.connect(self.serverHOST, self.serverPORT, 60)
-                client.publish("vehicle/create_reservations/server", request)
 
                 print("Conexão ", reconections + 1, " : Conexão estabelecida com servidor ")
                 time.sleep(2)
                 utility.clearTerminal
-
+                
+                client.user_data_set(request)
                 client.on_connect = self.receiveReservation
                 utility.clearTerminal()
                 client.on_message = self.waitInformation
@@ -81,12 +81,13 @@ class VehicleClient:
             
 
     # Método "on_connect": Estabelece a comunicação com o servidor para receber as reservas realizadas pelo servidor(es)
-    def receiveReservation(self, client, userdata, flags, rc):
+    def receiveReservation(self, client, userdata, flags, rc, properties):
 
         utility = VehicleUtility()
  
         if rc == 0:
-            
+
+            client.publish("vehicle/create_reservations/server", userdata)
             print(f" \u2705 Conexão estabelecida, aguardando resposta...")
             client.subscribe("server/create_reservations/vehicle") # Realiza a inscrição para receber o dado esperado
 
