@@ -244,14 +244,14 @@ while(repeat):
                 if route == False:
                     print("\t Digite dados validos ! ")
 
-                    time.sleep(3)
+                    time.sleep()
                     utility.clearTerminal()
                     wrongCities = True
 
                 else:
                     wrongCities = False
                     vClient = VehicleClient(cost= 0.0)
-                    vClient.sendRequest(dataFilePath, vehicle, route)
+                    vClient.sendRequest(dataFilePath, reservationsFilePath, vehicle, route)
 
             
         elif reply == "2" : # Opção 2: Ver reservas
