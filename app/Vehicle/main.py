@@ -250,7 +250,7 @@ while(repeat):
 
                 else:
                     wrongCities = False
-                    vClient = VehicleClient(cost= 0.0)
+                    vClient = VehicleClient()
                     vClient.sendRequest(dataFilePath, reservationsFilePath, vehicle, route)
 
             
