@@ -75,7 +75,7 @@ class VehicleClient:
             utility.clearTerminal()
 
     # Método "on_connect": Estabelece a comunicação com o servidor para receber as reservas realizadas pelo servidor(es)
-    def on_connect(self, client, userdata, flags, rc, properties):
+    def on_connect(self, client, userdata, flags, rc):
 
         utility = VehicleUtility()
  
