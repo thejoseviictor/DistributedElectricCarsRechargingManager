@@ -21,7 +21,7 @@ class VehicleClient:
         self.cost = 0.0
         self.reservations = []
 
-        self.messageArrived = threading.Event()
+        #self.messageArrived = threading.Event()
         self.message = None
         self.request = None
 
@@ -54,19 +54,16 @@ class VehicleClient:
 
             client.loop_start()
 
-            self.messageArrived.clear()
+            #self.messageArrived.clear()
+            #print(" Requisição enviada, aguardando resposta...")
 
-            
-            print(" Requisição enviada, aguardando resposta...")
-
-            received = self.messageArrived.wait(timeout=20)
+            #received = self.messageArrived.wait(timeout=20)
 
             client.loop_stop()
             client.disconnect()
 
-            if received:
-                vehicle.updateCredit(dataFilePath, self.cost, "-")
-                vehicle.keepReservations(reservationsFilePath,self.reservations)
+            vehicle.updateCredit(dataFilePath, self.cost, "-")
+            vehicle.keepReservations(reservationsFilePath,self.reservations)
 
         except Exception as e:
 
@@ -81,7 +78,6 @@ class VehicleClient:
             
             print(f" \t Conexão estabelecida ! ")
             client.subscribe("server/create_reservations/vehicle") # Realiza a inscrição para receber o dado esperado
-            
             client.publish("vehicle/create_reservations/server", self.request)
 
         else:
