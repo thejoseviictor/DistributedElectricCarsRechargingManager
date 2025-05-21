@@ -19,7 +19,7 @@ class ChargingPointsFile:
                 with open(self.json_file, "r", encoding="utf-8") as file:
                     self.chargingPointsList = json.load(file) # Salvando os Dados na Lista.
             except json.JSONDecodeError:
-                print(f"O Arquivo '{self.json_file}' Está Inválido ou Vazio!\n")
+                print(f"Arquivo '{self.json_file}' Está Inválido ou Vazio!\n")
     
     # Procurando um Ponto de Carregamento de um Posto Específico:
     def findChargingPoint(self, chargingPointID: int, chargingStationID: int):
