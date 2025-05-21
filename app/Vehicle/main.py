@@ -3,7 +3,7 @@ Grupo: João Macedo, José Vitor
 
 Componente Curricular: TEC502 - MI - Concorrência e conectividade 
 
-Concluido em: 11/04/2025;
+Concluido em: 21/04/2025;
 
 Declaro que este código foi elaborado por mim e pelo meu grupo de forma individualmente 
 e não contém nenhum trecho de código de outro colega ou de outro autor, tais como provindos 
@@ -26,6 +26,7 @@ import re  # Biblioteca que permite buscas, substituições e manipulação em s
 import sys # Bibliotecas usadas para trabalhar com caminhos, fluxo entre diretórios e entradas 
 import os  # e saidas diretamente com o sistema/terminal
 from pathlib import Path
+import paho.mqtt.client as mqtt
 import json # Biblioteca usada para trabalhar com arquivos .json e importar dados fictícios para o sistema
 
 
@@ -171,7 +172,7 @@ while(repeat):
             moneyCredit = round(10000, 2) # O valor de crédito do veiculo inicia com R$10.000
             currentEnergy = 100
 
-            maximumBattery = random.randint(30,50) # A capacidade máxima da bateria é gerada aleatoriamente entre o valor de 30 a 50 (kWh) 
+            maximumBattery = random.randint(51,100) # A capacidade máxima da bateria é gerada aleatoriamente entre o valor de 30 a 50 (kWh) 
 
             vehicle = Vehicle(vid = vid, owner = owner, licensePlate = licensePlate, moneyCredit = moneyCredit, currentEnergy = currentEnergy, maximumBattery = maximumBattery)
 
@@ -250,8 +251,9 @@ while(repeat):
 
                 else:
                     wrongCities = False
-                    vClient = VehicleClient()
-                    vClient.sendRequest(dataFilePath, reservationsFilePath, vehicle, route)
+                    client = mqtt.Client()
+                    vClient = VehicleClient(client, vehicle, route)
+                    #vClient.sendRequest(dataFilePath, reservationsFilePath, vehicle, route)
 
             
         elif reply == "2" : # Opção 2: Ver reservas
@@ -285,4 +287,4 @@ while(repeat):
             utility.clearTerminal()
             print("Digite uma opção válida !")
             time.sleep(2)
-            wrongActions = True       
+            wrongActions = True     

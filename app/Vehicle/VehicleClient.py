@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from Vehicle import Vehicle
 from VehicleUtility import VehicleUtility
 
-import paho.mqtt.client as mqtt
+#import paho.mqtt.client as mqtt
 import os
 import socket
 import json
@@ -14,8 +14,8 @@ import threading
 @dataclass
 class VehicleClient:
 
-    def __init__(self):
-           
+    def __init__(self, client, vehicle: Vehicle, Route: list):
+        self.client = client
         self.serverHOST = 'localhost'
         self.serverPORT = 1883
         self.cost = 0.0
@@ -26,71 +26,41 @@ class VehicleClient:
         self.request = None
 
         self.utility = VehicleUtility()
-
-    # Método que inicia requisição de reserva, utilizando dados do veículo e as informações de origem e destino para envio por meio da comunicação MQTT
-    def sendRequest(self, dataFilePath: str, reservationsFilePath: str , vehicle: Vehicle, Route: list[str]):
-  
-        # Dicionário utilizado para selecionar os dados pertinentes para o servidor ao pedir a reserva
-        vData = {
-                    "vehicleID": vehicle.vid ,
-                    "actualBatteryPercentage": vehicle.currentEnergy ,
-                    "batteryCapacity" : vehicle.maximumBattery ,
-                    "departureCityCodename" : Route[0] ,
-                    "arrivalCityCodename" : Route[1]
+        
+        self.vData = {
+            "vehicleID": vehicle.vid ,
+            "actualBatteryPercentage": vehicle.currentEnergy ,
+            "batteryCapacity" : vehicle.maximumBattery ,
+            "departureCityCodename" : Route[0] ,
+            "arrivalCityCodename" : Route[1]
         }
+        self.client.on_connect = self.on_connect
+        self.client.on_message = self.on_message
+        self.client.on_publish = self.on_publish
 
-        # Cria um json baseado no dicionário "vData" e envia as informações para o servidor correspondente.
-        self.request = json.dumps(vData, indent=4).encode('utf-8')
+        self.client.reconnect_delay_set(min_delay=2,max_delay=30)
+        self.client.connect_async(self.serverHOST, self.serverPORT, 60)
 
-        try:
-                
-            client = mqtt.Client()
-            client.on_connect = self.on_connect
-            client.on_message = self.on_message
-            client.on_publish = self.on_publish
 
-            client.reconnect_delay_set(min_delay=3,max_delay=30)
-            client.connect_async(self.serverHOST, self.serverPORT, 60)
+        self.client.loop_start()
 
-            client.loop_start()
 
-            #self.messageArrived.clear()
-            #print(" Requisição enviada, aguardando resposta...")
-
-            #received = self.messageArrived.wait(timeout=20)
-
-            client.loop_stop()
-            client.disconnect()
-
-            vehicle.updateCredit(dataFilePath, self.cost, "-")
-            vehicle.keepReservations(reservationsFilePath,self.reservations)
-
-        except Exception as e:
-
-            print(" Erro de conexão com o server ! ")
-            time.sleep(1)
-            self.utility.clearTerminal()
 
     # Método "on_connect": Estabelece a comunicação com o servidor para receber as reservas realizadas pelo servidor(es)
     def on_connect(self, client, userdata, flags, rc):
 
         if rc == 0:
-            
             print(f" \t Conexão estabelecida ! ")
-            client.subscribe("server/create_reservations/vehicle") # Realiza a inscrição para receber o dado esperado
-            client.publish("vehicle/create_reservations/server", self.request)
+            self.client.subscribe("server/create_reservations/vehicle") # Realiza a inscrição para receber o dado esperad
+
+            # Cria um json baseado no dicionário "vData" e envia as informações para o servidor correspondente.
+            self.client.publish("vehicle/create_reservations/server", json.dumps(self.vData))
 
         else:
             print(f" \u274C Falha na conexão. Código de retorno: {rc}")
-            time.sleep(5)
-            self.utility.clearTerminal()
+            #time.sleep(5)
+            #self.utility.clearTerminal()
 
-            try:
-                client.reconnect() # Tentando reconexão caso ocorra desconexão
-
-            except Exception as e:
-                print(" \u274C Erro ao tentar reconectar:", e)
-                time.sleep(2)
 
 
     # Método on_message: Trata a mensagem recebida pelo(s) servidor(es)
@@ -103,7 +73,10 @@ class VehicleClient:
         self.message = json.loads(rMessage)
         print(self.message)
 
-        for r in self.message.values():
+        #vehicle.updateCredit(dataFilePath, self.cost, "-")
+        #vehicle.keepReservations(reservationsFilePath,self.reservations)
+
+        '''for r in self.message.values():
 
             try:
                 self.cost += int(r["price"])
@@ -111,7 +84,7 @@ class VehicleClient:
             except Exception as e:
                 self.cost += 0
                 
-            self.reservations.append(r)
+            self.reservations.append(r)'''
         
         #self.messageArrived.set()
     
