@@ -102,7 +102,12 @@ class VehicleClient:
     # Método on_message: Trata a mensagem recebida pelo(s) servidor(es)
     def on_message(self, client, userdata, msg):
 
+        payload = msg.payload.decode()
+        print(" Mensagem recebida:", repr(payload))
+        time.sleep(30)
+
         self.message = json.loads(msg.payload.decode())
+
 
         if type(self.message) == list:
 
