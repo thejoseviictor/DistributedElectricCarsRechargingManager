@@ -1,4 +1,3 @@
-# Repositório: macedoxx2000/vehicle:lastest
 
 # Imagem base para a "build" da imagem atual
 FROM python:3.13.3
@@ -6,7 +5,7 @@ FROM python:3.13.3
 # Define o diretório principal
 WORKDIR /app
 
-# Instala todos os pacotes/bibliotecas definidos no arquivo requirements.txt e sem cache local
+# Instala todos os pacotes/bibliotecas externas definidos no arquivo "requirements.txt" e sem cache local
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
