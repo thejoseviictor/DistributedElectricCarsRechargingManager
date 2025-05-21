@@ -107,20 +107,22 @@ class VehicleUtility:
     def startAnimation(self):
 
         title = "\t ------------- veHI : Sistema de recarga para veículos elétricos -------------\n"
+        time.sleep(2)
 
-        # Listas que guardam o conjunto de emojis e símbolos (str) para realizar a animação inicial
+        '''# Listas que guardam o conjunto de emojis e símbolos (str) para realizar a animação inicial
         animation = []
         landscape = []
 
         '''
-            Emojis utilizados:
+        '''
+        Emojis utilizados:
 
-            - 💨 : \U0001F4A8
-            - 🚗 : \U0001F697
-            - 🌳 : \U0001F333
-            - ☀️ : \u2600\ufe0f
-            - ☁️ : \u2601\ufe0f
-         
+        - 💨 : \U0001F4A8
+        - 🚗 : \U0001F697
+        - 🌳 : \U0001F333
+        - ☀️ : \u2600\ufe0f
+        - ☁️ : \u2601\ufe0f
+        '''
          
         '''   
         animation.append("\t ------------------------------------------------------------------------------ \n\t \t -- \t\t -- \t\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 \n \t ------------------------------------------------------------------------------")
@@ -145,4 +147,5 @@ class VehicleUtility:
             print(animation[x])
             time.sleep(0.8)
             self.clearTerminal()
+    '''
 
