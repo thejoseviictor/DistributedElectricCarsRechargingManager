@@ -69,7 +69,7 @@ def mqttCreateReservations(client, action: str, vehicleData: dict):
                 # Verificando a Resposta da API:
                 if response.ok: # Atalho Para os Status de Sucesso, de 200 até 300.
                     result = response.json() # Convertendo a Resposta do Flask Para Dicionário.
-                    client.publish(publisherTopic, str(result)) # Enviando a Resposta no MQTT como String.
+                    client.publish(publisherTopic, json.dumps(result)) # Enviando a Resposta no MQTT como String no Formato JSON Válido (Aspas Duplas nas Chaves).
                     print("Resposta Enviada Via MQTT:\n")
                     print(json.dumps(result, indent=4, ensure_ascii=False)) # Mensagem Identada.
                     print("\n")
