@@ -21,7 +21,6 @@ class VehicleClient:
         self.cost = 0.0
         self.reservations = []
 
-        #self.messageArrived = threading.Event()
         self.message = None
         self.request = None
 
@@ -51,7 +50,7 @@ class VehicleClient:
 
         if rc == 0:
             print(f" \t Conexão estabelecida ! ")
-            self.client.subscribe("server/create_reservations/vehicle") # Realiza a inscrição para receber o dado esperad
+            self.client.subscribe("server/create_reservations/vehicle") # Realiza a inscrição para receber o dado esperado
 
             # Cria um json baseado no dicionário "vData" e envia as informações para o servidor correspondente.
             self.client.publish("vehicle/create_reservations/server", json.dumps(self.vData))
@@ -66,17 +65,14 @@ class VehicleClient:
     # Método on_message: Trata a mensagem recebida pelo(s) servidor(es)
     def on_message(self, client, userdata, msg):
 
-        rMessage = msg.payload.decode()
+        rMessage = msg.payload.decode() # Pega o dado recebido e o exibe
         print(" Mensagem recebida:", repr(rMessage))
         time.sleep(5)
 
         self.message = json.loads(rMessage)
         print(self.message)
 
-        #vehicle.updateCredit(dataFilePath, self.cost, "-")
-        #vehicle.keepReservations(reservationsFilePath,self.reservations)
-
-        '''for r in self.message.values():
+        '''for r in self.message.values(): # Tratamento para separação de reservas correspondentes ao veículo não foi finalizada
 
             try:
                 self.cost += int(r["price"])

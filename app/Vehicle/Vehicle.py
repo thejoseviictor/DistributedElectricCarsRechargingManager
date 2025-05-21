@@ -24,7 +24,7 @@ class Vehicle:
 
     utility = VehicleUtility()
 
-    def showInformations(self):
+    def showInformations(self): # Método para visualização de dados de usúario
          print(f"\n\t Nome completo: {self.owner.name} ")
          print(f"\n\t CPF: {self.owner.cpf}")
          print(f"\n\t Email: {self.owner.email}")
@@ -34,7 +34,7 @@ class Vehicle:
          print(f"\n\t Crédito saldo : {self.moneyCredit}")
          
 
-    def showReservations(self):
+    def showReservations(self): # Método para visualizar todas as reservas efetuadas para o veículo
 
         if self.reservations :
 
@@ -61,7 +61,7 @@ class Vehicle:
             time.sleep(3)
    
 
-    def savingLoginData(self, dataFilePath: str):
+    def savingLoginData(self, dataFilePath: str): # Método para salvar novos dados gerados na opção "2 - CRIAR CONTA"
 
             data = {
                 
@@ -107,7 +107,7 @@ class Vehicle:
         time.sleep(3)
         self.utility.clearTerminal()
 
-    def loadingData(self, dataFilePath: str, reservationsFilePath: str):
+    def loadingData(self, dataFilePath: str, reservationsFilePath: str): # Método para carregar dados de conta (dados gerados e salvos anteriormente)
 
             with open(dataFilePath, 'r') as f:
                 data = json.load(f)
@@ -127,7 +127,7 @@ class Vehicle:
 
             self.reservations = listReservations
 
-    def keepReservations(self, reservationsFilePath: str, newReservations: list[dict]):
+    def keepReservations(self, reservationsFilePath: str, newReservations: list[dict]): # Salvando as novas reservas num json "reservations.json"
 
         with open(reservationsFilePath, 'r') as f:
               data = json.load(f)

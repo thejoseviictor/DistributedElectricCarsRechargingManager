@@ -10,10 +10,10 @@ class VehicleUtility:
 
 
     @staticmethod
-    def clearTerminal():
+    def clearTerminal(): # Método utilizado para apagar terminal 
        os.system('cls' if os.name == 'nt' else 'clear')
     
-    def endAnimation(self):
+    def endAnimation(self): # Método que cria uma pequena animação de encerramento de programa
 
         loadPoints = ["...", "..", ".", ""]
 
@@ -34,7 +34,7 @@ class VehicleUtility:
         route.append(origin)
         route.append(destination)
 
-
+        # Pega os valores determinados pelo usúario e substitui pelos codinomes correspondentes de cada cidade, também trata caso o usúario defina valores inválidos para a lógica
         for t in range( len(route) ) : 
 
             local = route[t]
@@ -74,7 +74,7 @@ class VehicleUtility:
 
         return route
     
-    def writeReplyBack(self, wrongActions: bool, repeat: bool):
+    def writeReplyBack(self, wrongActions: bool, repeat: bool): # Método utilizado para voltar para o ínicio ou para encerrar o programa, dentro das opções de login(opções 1, 2, 3 e 4)
 
         reply = input("\n O que deseja agora: \n 1. Voltar para o início. \n 2. Fechar programa. \n ->")
 
@@ -88,7 +88,7 @@ class VehicleUtility:
             repeat = False
             self.endAnimation()
 
-    def nomalizeName(self, fakeName: list[str]):
+    def nomalizeName(self, fakeName: list[str]): # Método para normalizar(tratar) a representação de caracteres especiais(ç) ou acentuações(á, é, à, è, õ,ã, ê, ô, â ...) na geração de nomes aleatórios(str)
 
         genericName = []
 
@@ -98,54 +98,15 @@ class VehicleUtility:
             unormalizatedName = unicodedata.normalize('NFD', n) # Separação de caractere e acentuação
             normalizatedName = ''.join(c for c in unormalizatedName if not unicodedata.combining(c)) # Remoção das acentuações
             NameWithoutCedilhado = normalizatedName.replace('ç', 'c').replace('Ç', 'C') # Substituição dos caracteres "ç" e "Ç" por "c" e "C", respectivamente
-            name = NameWithoutCedilhado.encode('ASCII', 'ignore').decode('ASCII')
+            name = NameWithoutCedilhado.encode('ASCII', 'ignore').decode('ASCII') # Substituição de "ç" ou "Ç" por "c" e "Ç, respectivamente"
 
             genericName.append(name)
 
         return genericName
     
-    def startAnimation(self):
+    def startAnimation(self): # Exibição inicial no programa
 
         title = "\t ------------- veHI : Sistema de recarga para veículos elétricos -------------\n"
+        print(title)
         time.sleep(2)
-
-        '''# Listas que guardam o conjunto de emojis e símbolos (str) para realizar a animação inicial
-        animation = []
-        landscape = []
-
-        '''
-        '''
-        Emojis utilizados:
-
-        - 💨 : \U0001F4A8
-        - 🚗 : \U0001F697
-        - 🌳 : \U0001F333
-        - ☀️ : \u2600\ufe0f
-        - ☁️ : \u2601\ufe0f
-        '''
-         
-        '''   
-        animation.append("\t ------------------------------------------------------------------------------ \n\t \t -- \t\t -- \t\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 \n \t ------------------------------------------------------------------------------")
-        animation.append("\t ------------------------------------------------------------------------------ \n\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
-        animation.append("\t ------------------------------------------------------------------------------ \n\t \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
-        animation.append("\t ------------------------------------------------------------------------------ \n\t \t -- \t\t -- \t\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 \n \t ------------------------------------------------------------------------------")
-        animation.append("\t ------------------------------------------------------------------------------ \n\t -- \t\t -- \t\t -- \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
-        animation.append("\t ------------------------------------------------------------------------------ \n\t \U0001F697\U0001F4A8 -- \t\t -- \t\t -- \t\t -- \t\t -- \t \n \t ------------------------------------------------------------------------------")
-        
-        landscape.append("\t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f")
-        landscape.append("\t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333")
-        landscape.append("\t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333 \t \U0001F333")
-        landscape.append("\t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f \t \U0001F333")
-        landscape.append("\t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f \t \u2601\ufe0f")
-        landscape.append("\t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \U0001F333 \t \U0001F333 \t \U0001F333 \t \u2601\ufe0f \t \u2600\ufe0f")
-        
-
-        for x in range(len(animation)):
-
-            print(title)
-            print(landscape[x])
-            print(animation[x])
-            time.sleep(0.8)
-            self.clearTerminal()
-    '''
 

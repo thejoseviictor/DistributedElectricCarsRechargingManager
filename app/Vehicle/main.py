@@ -172,7 +172,7 @@ while(repeat):
             moneyCredit = round(10000, 2) # O valor de crédito do veiculo inicia com R$10.000
             currentEnergy = 100
 
-            maximumBattery = random.randint(51,100) # A capacidade máxima da bateria é gerada aleatoriamente entre o valor de 30 a 50 (kWh) 
+            maximumBattery = random.randint(51,100) # A capacidade máxima da bateria é gerada aleatoriamente entre o valor de 51 (potência mínima para o carro percorrer todas as rotas) a 100 (kWh) 
 
             vehicle = Vehicle(vid = vid, owner = owner, licensePlate = licensePlate, moneyCredit = moneyCredit, currentEnergy = currentEnergy, maximumBattery = maximumBattery)
 
@@ -253,7 +253,6 @@ while(repeat):
                     wrongCities = False
                     client = mqtt.Client()
                     vClient = VehicleClient(client, vehicle, route)
-                    #vClient.sendRequest(dataFilePath, reservationsFilePath, vehicle, route)
 
             
         elif reply == "2" : # Opção 2: Ver reservas
