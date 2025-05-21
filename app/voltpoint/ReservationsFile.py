@@ -63,8 +63,11 @@ class ReservationsFile:
     # Lendo as Reservas no Arquivo ".json":
     def readReservations(self):
         if os.path.exists(self.json_file):
-            with open(self.json_file, "r", encoding="utf-8") as file:
-                self.reservationsList = json.load(file) # Salvando os Dados do Arquivo ".json" na Lista.
+            try:
+                with open(self.json_file, "r", encoding="utf-8") as file:
+                    self.reservationsList = json.load(file) # Salvando os Dados na Lista.
+            except json.JSONDecodeError:
+                print(f"O Arquivo '{self.json_file}' Está Inválido ou Vazio!\n")
     
     # Verificando Se o Veículo Tem Reserva em um Posto de Recarga Específico:
     def findReservation(self, chargingStationID: int, vehicleID: int):

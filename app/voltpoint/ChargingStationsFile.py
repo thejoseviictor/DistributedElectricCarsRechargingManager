@@ -15,8 +15,11 @@ class ChargingStationsFile:
     # Lendo os Pontos de Recarga no Arquivo ".json":
     def readChargingStations(self):
         if os.path.exists(self.json_file):
-            with open(self.json_file, "r", encoding="utf-8") as file:
-                self.chargingStationsList = json.load(file) # Salvando os Dados do Arquivo ".json" na Lista.
+            try:
+                with open(self.json_file, "r", encoding="utf-8") as file:
+                    self.chargingStationsList = json.load(file) # Salvando os Dados na Lista.
+            except json.JSONDecodeError:
+                print(f"O Arquivo '{self.json_file}' Está Inválido ou Vazio!\n")
     
     # Procurando um Posto de Recarga Específico:
     def findChargingStation(self, chargingStationID: int):
