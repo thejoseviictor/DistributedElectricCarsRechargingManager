@@ -106,14 +106,14 @@ class VehicleClient:
         for r in self.message.values():
 
             try:
-                self.cost += int(r['price'])
+                self.cost += int(r["price"])
 
             except Exception as e:
                 self.cost += 0
                 
             self.reservations.append(r)
         
-        self.messageArrived.set()
+        #self.messageArrived.set()
     
     def on_publish(self, client, userdata, mid):
         print("\n\t Requisição publicada com sucesso! ")
