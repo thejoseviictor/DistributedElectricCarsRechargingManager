@@ -60,7 +60,7 @@ def createReservations():
             # Retornando a Mensagem de Erro:
             return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
-            bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
+            bookedReservations.extend(response.get_json()) # Adicionando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
     
     # Copiando as Reservas Destinadas ao Servidor Desta Empresa:
@@ -115,7 +115,7 @@ def createReservations():
             # Retornando a Mensagem de Erro:
             return jsonify({"error": "Não Foi Possível Conseguir Reservas nos Outros Servidores!"}), status_code
         else:
-            bookedReservations.append(response.get_json()) # Concatenando as Reservas Realizadas nos Outros Servidores.
+            bookedReservations.extend(response.get_json()) # Adicionando as Reservas Realizadas nos Outros Servidores.
             return jsonify(bookedReservations), 200 # Retornando Todas as Reservas Realizadas Com Sucesso (200).
 
 # Rodando o Servidor no IP da Máquina:
