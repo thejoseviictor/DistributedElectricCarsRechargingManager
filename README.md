@@ -1,4 +1,4 @@
-# DistributedElectricCarsRechargingManager
+# DistributedElectricCarsRechargingManager (Servers)
 
 ## Arquitetura de Sistema dos Servidores:
 Os servidores são responsáveis por atender aos agendamentos de reservas para usuários de veículos elétricos em diferentes cidades do país. Através de uma requisição atômica, de servidor para servidor, sem centralização das reservas.
